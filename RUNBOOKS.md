@@ -9,7 +9,7 @@ For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 
 ### Before Release
 
-1. Confirm task classification and governance template (T1/T2/T3).
+1. Confirm task classification, change class, and gate profile.
 2. Confirm design review is complete (at minimum self-review for T1).
 3. Confirm validation results exist with evidence.
 4. Confirm rollback method is known and documented.
@@ -17,6 +17,12 @@ For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 6. Confirm observation items are defined (what to watch after release).
 7. For T2+: confirm git checkpoint exists (commit + tag for milestones).
 8. For T3: confirm staging validation has passed.
+
+### Pipeline Check
+
+Before promoting, confirm:
+- No more than 1 active promotion in progress.
+- Pipeline is not overloaded (max 3 active tasks in impl/review/validation).
 
 ### During Release
 
@@ -144,6 +150,15 @@ Only close the incident when ALL of:
 - [ ] the fix is in place
 - [ ] the anti-recurrence improvement is also in place
 - [ ] for SEV-1/2: post-incident review document is written
+- [ ] relevant signal is healthy for 3 consecutive observation cycles
+
+### Recurrence Escalation
+
+If the same issue class recurs 3 times within 7 days:
+- auto-escalate severity by one level
+- the post-incident review must reference all prior occurrences
+- must explain why previous preventive measures were insufficient
+- controller must decide whether to escalate the change class
 
 ### Post-Incident Review (SEV-1 and SEV-2)
 

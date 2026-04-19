@@ -6,7 +6,22 @@ requiring heavy process.
 
 For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 
-## 1. Design Checklist
+## 1. Classification Checklist
+
+Before any substantial work begins:
+
+- [ ] Project level chosen (L1/L2/L3)?
+- [ ] Project type chosen (A/B/C/D)?
+- [ ] Change risk chosen (R1/R2/R3)?
+- [ ] Change class chosen (A/B/C/D)?
+- [ ] Governance template chosen (T1/T2/T3)?
+- [ ] Gate profile mapped (G-Lite/G-Std/G-Full)?
+- [ ] If Class C or D, was the template raised appropriately?
+- [ ] If memory/state/orchestration/permissions touched, was risk raised to R3?
+- [ ] If Class D, is R3 and T3 forced?
+- [ ] Task ID assigned?
+
+## 2. Design Checklist
 
 ### T1 (Lightweight)
 
@@ -38,7 +53,7 @@ All T2 items plus:
 - [ ] Are state transitions closed?
 - [ ] Are blast-radius concerns addressed?
 
-## 2. Design Review Checklist
+## 3. Design Review Checklist
 
 ### T1 (Self-Review)
 
@@ -67,7 +82,7 @@ All T2 items plus:
 - [ ] Is there a clear runtime observation approach?
 - [ ] Review result documented with findings
 
-## 3. Code Review Checklist
+## 4. Code Review Checklist
 
 ### T1 (Minimal Self-Check)
 
@@ -96,7 +111,7 @@ All T2 items plus:
 - [ ] Are monitoring hooks sufficient?
 - [ ] Is rollback genuinely executable?
 
-## 4. Validation Checklist
+## 5. Validation Checklist
 
 ### T1 (Focused Check)
 
@@ -146,7 +161,7 @@ All T2 items plus:
 - [ ] What happens on duplicate input?
 - [ ] Are retries safe?
 
-## 5. Release Checklist
+## 6. Release Checklist
 
 ### T1 (Simple Deploy)
 
@@ -175,8 +190,14 @@ All T2 items plus:
 - [ ] Stop conditions explicit before rollout
 - [ ] Backup readiness confirmed
 - [ ] Rollback path still valid at every step
+- [ ] Promotion pipeline within WIP limit (max 1 active promotion)
+- [ ] For Class C: migration/compatibility validated
+- [ ] For Class D: explicit governance sign-off documented
+- [ ] For Class D: no direct production landing
+- [ ] For Class D: rollback drill or equivalent completed
+- [ ] Environment path correct (dev->staging->prod, no shortcut)
 
-## 6. Monitoring Checklist
+## 7. Monitoring Checklist
 
 ### T1 (Basic Health)
 
@@ -202,10 +223,11 @@ All T2 items plus:
 - [ ] Are daily reports being generated?
 - [ ] Is the monitoring system itself being monitored?
 
-## 7. Closed-Loop Checklist
+## 8. Closed-Loop Checklist
 
 After a runtime problem (all tiers):
 
+- [ ] Was duplicate task lookup done before creating new issue?
 - [ ] Did we only patch the visible symptom, or fix the real cause?
 - [ ] Did we identify the real trigger?
 - [ ] Did we add at least one durable improvement:
@@ -217,8 +239,9 @@ After a runtime problem (all tiers):
   - [ ] runbook update
 - [ ] Is the chance of recurrence lower now?
 - [ ] Did we record the lesson in a reusable form?
+- [ ] Did closure wait for 3 healthy observation cycles (not just deployment)?
 
-## 8. Language Control Checklist
+## 9. Language Control Checklist
 
 Before marking any task as complete:
 

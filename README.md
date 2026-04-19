@@ -2,6 +2,8 @@
 
 A comprehensive lifecycle governance framework for AI agent-driven software development.
 
+**Version 3** — with change classes, gate profiles, artifact chains, and aligned cross-check improvements.
+
 ## What is this?
 
 When AI coding agents work on a real project, they face a fundamental quality problem: **changes accumulate fast, but review, testing, and governance do not keep up.**
@@ -21,7 +23,7 @@ Without governance, AI coding projects tend to:
 - Accumulate monitoring debt until production issues become invisible
 - Fake completion with vague language ("should work", "probably fixed")
 
-AgentSDLC prevents these failure modes with **7 stages, 7 gates, governance tiering, and 1 closed feedback loop**.
+AgentSDLC prevents these failure modes with **7 stages, 7 gates, 3 gate profiles, 4 change classes, governance tiering, and 1 closed feedback loop**.
 
 ## Key Design Principle
 
@@ -33,17 +35,21 @@ Use the lightest governance that still preserves correctness, verification, roll
 
 Not every task needs the full ceremony. AgentSDLC uses three tiers:
 
-| Tier | Name        | When to Use                                      | Gate Chain              |
-|------|-------------|--------------------------------------------------|-------------------------|
-| T1   | Lightweight | One-off scripts, low-risk fixes, small personal tasks | G1-lite + G3 + G5-lite |
-| T2   | Standard    | Persistent personal projects, most normal work   | G1 + G3 + G4 + G5 + G6 |
-| T3   | Reinforced  | High-risk changes, state/memory/core-loop work   | All gates (G1-G7)       |
+| Tier | Name        | Gate Profile | When to Use                                      | Gate Chain              |
+|------|-------------|-------------|--------------------------------------------------|-------------------------|
+| T1   | Lightweight | G-Lite      | One-off scripts, low-risk fixes, small personal tasks | G1-lite + G3 + G5-lite |
+| T2   | Standard    | G-Std       | Persistent personal projects, most normal work   | G1 + G3 + G4 + G5 + G6 |
+| T3   | Reinforced  | G-Full      | High-risk changes, state/memory/core-loop work   | All gates (G1-G7)       |
 
-The tier is selected by classifying the project and task:
+The tier is selected by classifying the project and task across **four dimensions**:
 
 - **Project Level**: L1 (one-off) / L2 (persistent personal) / L3 (multi-user)
 - **Project Type**: A (script) / B (app/API) / C (AI agent/workflow) / D (integration)
 - **Change Risk**: R1 (low) / R2 (medium) / R3 (high)
+- **Change Class**: A (safe local) / B (runtime behavior) / C (env/data/memory) / D (self-evolution/authority)
+
+Change class can **override the minimum governance template** — a small R1 docs fix is Class A,
+but a change to self-evolution permissions is Class D, forcing T3 regardless of project size.
 
 ## The Lifecycle
 
@@ -68,19 +74,23 @@ Multi-agent delegation (separate architect, coding, review, test agents) is desc
 
 | File | Purpose |
 |------|---------|
-| [`AI_CODING_LIFECYCLE_GOVERNANCE.md`](AI_CODING_LIFECYCLE_GOVERNANCE.md) | **Main contract.** Stage definitions, gate criteria, tiering, change classification, agent model, delivery formats, incident response, environment separation, rollback discipline. |
-| [`STAGE_GATES_REFERENCE.md`](STAGE_GATES_REFERENCE.md) | **Quick reference card.** At-a-glance gate entry/exit criteria per tier, decision matrices, required test levels. |
-| [`MONITORING_FEEDBACK_LOOP.md`](MONITORING_FEEDBACK_LOOP.md) | **Closed-loop spec.** Signal classification, issue-to-task conversion, three task paths, severity SLAs. |
+| [`AI_CODING_LIFECYCLE_GOVERNANCE.md`](AI_CODING_LIFECYCLE_GOVERNANCE.md) | **Main contract.** Stage definitions, gate criteria, tiering, change classification, gate profiles, agent model, delivery formats, incident response, environment separation, rollback discipline. |
+| [`agents.md`](agents.md) | **Drop-in agent prompt.** Copy-paste-ready operating prompt for any project's controller agent. |
+| [`STAGE_GATES_REFERENCE.md`](STAGE_GATES_REFERENCE.md) | **Quick reference card.** Gate profiles (G-Lite/G-Std/G-Full), entry/exit criteria per tier, decision matrices. |
+| [`MONITORING_FEEDBACK_LOOP.md`](MONITORING_FEEDBACK_LOOP.md) | **Closed-loop spec.** Signal schema, issue-to-task conversion, three handling paths, severity SLAs, health-based closure. |
 | [`AGENT_ROLE_MATRIX.md`](AGENT_ROLE_MATRIX.md) | **Role mapping.** Single-agent role-switching guide + multi-agent scale-up reference. |
-| [`AI_GUARDRAILS.md`](AI_GUARDRAILS.md) | **AI-specific controls.** Fake completion prevention, context drift, memory contamination, loop exit behavior. |
-| [`CHECKLISTS.md`](CHECKLISTS.md) | **Stage checklists.** Per-tier checklists for design, review, validation, release, monitoring, closed-loop. |
-| [`TEMPLATES.md`](TEMPLATES.md) | **Fill-in-the-blank templates.** Task cards, design briefs, implementation results, incident closure, rule cards. |
-| [`RUNBOOKS.md`](RUNBOOKS.md) | **Step-by-step guides.** Release, rollback, and incident handling runbooks. |
+| [`AI_GUARDRAILS.md`](AI_GUARDRAILS.md) | **AI-specific controls.** Fake completion prevention, context drift, memory contamination, Class D sign-off, environment boundaries. |
+| [`CHECKLISTS.md`](CHECKLISTS.md) | **Stage checklists.** Classification, design, review, validation, release, monitoring, closed-loop, language control. |
+| [`TEMPLATES.md`](TEMPLATES.md) | **Fill-in-the-blank templates.** Task cards with artifact chain IDs, promotion records, incident closure, controller exception. |
+| [`RUNBOOKS.md`](RUNBOOKS.md) | **Step-by-step guides.** Release (with pipeline check), rollback, incident handling (with recurrence escalation). |
 
 ## Quick Start
 
 ### 1. Give the contract to your controller agent
 
+The fastest way: copy `agents.md` into your project's agent prompt directory.
+
+Or use the full contract:
 ```
 You are the development controller for this project.
 Follow the operating contract in AI_CODING_LIFECYCLE_GOVERNANCE.md.
@@ -90,15 +100,18 @@ Follow the operating contract in AI_CODING_LIFECYCLE_GOVERNANCE.md.
 
 ```md
 ## Task Classification
+- Task ID: T-2026-0419-001
 - Project Level: L2
 - Project Type: C
 - Change Risk: R2
+- Change Class: B
 - Governance Template: T2
+- Gate Profile: G-Std
 
 ## Why
 - Persistent personal project
 - AI agent/workflow system
-- Standard feature work
+- Standard feature work, runtime behavior change
 ```
 
 ### 3. Follow the tier-appropriate gate chain
@@ -136,6 +149,7 @@ When monitoring detects an issue, it follows one of three paths:
 4. **Evidence over assertion.** Claims must be backed by validation, not vague language.
 5. **Rollback is always possible.** If you cannot go back, you are not under control.
 6. **Incidents become improvements.** Every runtime issue produces at least one durable control.
+7. **Pipeline discipline.** Max 3 active tasks, max 1 promotion. Don't start new work when overloaded.
 
 ## Adapting to Your Project
 

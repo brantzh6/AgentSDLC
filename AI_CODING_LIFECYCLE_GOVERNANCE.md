@@ -1,7 +1,7 @@
 # AI Coding Lifecycle Governance Contract
 
-Status: v2
-Version: 2.0
+Status: v3
+Version: 3.0
 
 ## 1. Purpose and Scope
 
@@ -58,6 +58,17 @@ unrecoverable and unmaintainable.
 7. Rollback must always be possible.
    - If the project cannot return to a previously trusted state, it is not
      under control.
+
+8. Design before implementation.
+   - Do not jump into coding for any non-trivial task.
+   - Every task must have at least a minimal design statement appropriate
+     for its governance tier.
+
+9. Pipeline discipline.
+   - No more than 3 tasks in active implementation/review/validation.
+   - No more than 1 task in active promotion.
+   - Do not start new major work when the pipeline is overloaded,
+     unless handling an incident.
 
 ### 2.2 Operating Defaults
 
@@ -123,17 +134,54 @@ Default assumption if unclear: **R2**.
 - main agent loop or control loop
 - production incident remediation
 
-### 3.4 Governance Template Selection
+### 3.4 Change Class
 
-| Template | Name        | When to Use                            | Gate Chain              |
-|----------|-------------|----------------------------------------|-------------------------|
-| T1       | Lightweight | L1 + R1/R2, or L2 + R1                | G1-lite + G3 + G5-lite  |
-| T2       | Standard    | L2 + R2, L1 + R3, most persistent work | G1 + G3 + G4 + G5 + G6 |
-| T3       | Reinforced  | L2 + R3, L3 + any, blast-radius high  | All gates (G1-G7)       |
+Change class is **separate from risk**. Risk describes how dangerous this
+specific modification is. Class describes **what kind of system surface is
+being changed**, and therefore what minimum governance chain must apply.
+
+| Class | Name                                | Typical Cases                                            |
+|-------|-------------------------------------|----------------------------------------------------------|
+| A     | Safe local change                   | Small bug fix, docs correction, narrow test addition     |
+| B     | Runtime behavior change             | New route, API change, workflow branch, state machine     |
+| C     | Environment / data / schema / memory| DB migration, memory contract, config, knowledge wiring   |
+| D     | Self-evolution / boundary / authority| Auto-modification rules, review bypass, mutation perms    |
+
+**Change-class override rules:**
+
+- Class A: keep the base template unless other signals force higher.
+- Class B: minimum template is **T2** for persistent projects.
+- Class C: minimum template is **T2**; for L2/L3, default to **T3**.
+- Class D: **always force T3 and R3**. No self-acceptance. No direct
+  production landing. No silent delegation of approval authority.
+  Requires **explicit governance sign-off** (see Section 7.3).
+
+Default assumption if unclear: **Class B**.
+
+### 3.5 Governance Template Selection
+
+| Template | Name        | When to Use                            | Gate Profile | Gate Chain              |
+|----------|-------------|----------------------------------------|-------------|-------------------------|
+| T1       | Lightweight | L1 + R1/R2, or L2 + R1                | G-Lite      | G1-lite + G3 + G5-lite  |
+| T2       | Standard    | L2 + R2, L1 + R3, most persistent work | G-Std       | G1 + G3 + G4 + G5 + G6 |
+| T3       | Reinforced  | L2 + R3, L3 + any, blast-radius high  | G-Full      | All gates (G1-G7)       |
+
+**Gate profiles** bridge the gap between flexible tiering and structured gates:
+
+- **G-Lite**: minimal gate chain — brief design, implement, focused check.
+  Suitable for bounded, easily reversible work.
+- **G-Std**: standard gate chain — structured design, role-switch review,
+  implement, code review, standard test, staged deploy.
+  Suitable for most persistent project work.
+- **G-Full**: full gate chain — all 7 gates with strongest requirements.
+  Required for high-risk, Class C/D, or production-critical changes.
+
+After selecting a base template from `Level + Risk`, apply the change-class
+override rules from Section 3.4 to raise the template if needed.
 
 Default assumption if unclear: **T2**.
 
-### 3.5 Task Classification Output
+### 3.6 Task Classification Output
 
 Before starting a task, the controller should produce:
 
@@ -142,10 +190,13 @@ Before starting a task, the controller should produce:
 - Project Level: L1 / L2 / L3
 - Project Type: A / B / C / D
 - Change Risk: R1 / R2 / R3
+- Change Class: A / B / C / D
 - Governance Template: T1 / T2 / T3
+- Gate Profile: G-Lite / G-Std / G-Full
 
 ## Why
 - <concise reasons for the classification>
+- <note any class override applied>
 ```
 
 ## 4. Lifecycle Stage Definitions
@@ -516,10 +567,13 @@ When monitoring detects an actionable finding:
 
 1. The finding is converted to a structured task containing:
    - source: monitoring system identifier
-   - signal level: critical / warning / degraded / info
+   - source_type: job / route / connector / loop / memory / scheduler / alert
+   - source_id: unique signal identifier (for dedup and traceability)
+   - signal_level: critical / warning / degraded / info
    - evidence: log entries, health snapshots, metric values
-   - affected surface: which component or path is impacted
-   - auto-processible: whether automated correction is safe
+   - affected_surface: which component or path is impacted
+   - auto_processible: whether automated correction is safe
+   - category: reliability / performance / quality / security
 
 2. Duplicate detection: if an open task for the same source and category
    already exists, update it instead of creating a new one.
@@ -570,13 +624,13 @@ Tasks that require code changes re-enter the lifecycle at Stage 1:
 
 ## 6. Stage Gate Summary
 
-### 6.1 Minimum Gates by Governance Template
+### 6.1 Gate Profiles and Minimum Gates
 
-| Template | G1 Design | G2 Review | G3 Implement | G4 Code Review | G5 Test | G6 Deploy | G7 Monitor |
-|----------|-----------|-----------|-------------|----------------|---------|-----------|------------|
-| T1       | Lite      | Self-check| Required    | Self-check     | Focused | Simple    | Basic      |
-| T2       | Standard  | Role-switch| Required   | Role-switch    | Standard| Staged    | Standard   |
-| T3       | Full      | Full      | Required    | Full           | Full    | Full chain| Full       |
+| Template | Gate Profile | G1 Design | G2 Review | G3 Implement | G4 Code Review | G5 Test | G6 Deploy | G7 Monitor |
+|----------|-------------|-----------|-----------|-------------|----------------|---------|-----------|------------|
+| T1       | G-Lite      | Lite      | Self-check| Required    | Self-check     | Focused | Simple    | Basic      |
+| T2       | G-Std       | Standard  | Role-switch| Required   | Role-switch    | Standard| Staged    | Standard   |
+| T3       | G-Full      | Full      | Full      | Required    | Full           | Full    | Full chain| Full       |
 
 ### 6.2 Gate Reference
 
@@ -590,27 +644,51 @@ Tasks that require code changes re-enter the lifecycle at Stage 1:
 | G6   | Production Deployed   | Staging + prod validation passed          | Controller   |
 | G7   | Monitoring Active     | Continuous; triggers loop on findings     | Automated    |
 
-## 7. Change Classification
+## 7. Change Classification and Class Controls
 
-### Class A: Safe Local Change
+Change class definitions are in Section 3.4. This section defines the
+control requirements per class.
 
-Examples: small bug fix, focused route extension, narrow test addition,
-documentation correction.
+### 7.1 Class-Specific Minimum Controls
 
-### Class B: Runtime Behavior Change
+| Control                     | Class A | Class B | Class C         | Class D           |
+|-----------------------------|---------|---------|-----------------|-------------------|
+| Minimum template            | T1      | T2*     | T2 (T3 for L2+) | T3 (forced)       |
+| Minimum risk                | --      | --      | --              | R3 (forced)       |
+| Rollback note               | Yes     | Yes     | Explicit plan   | Explicit plan     |
+| Compatibility check         | --      | --      | Required        | Required          |
+| Migration/backup readiness  | --      | --      | Required        | Required          |
+| Direct production landing   | Allowed | Allowed | Cautious        | **Prohibited**    |
+| Governance sign-off         | --      | --      | Controller      | Explicit (7.3)    |
 
-Examples: new runtime route, state machine change, API behavior change,
-controller decision boundary change.
+*Class B minimum T2 only for persistent (L2+) projects.
 
-### Class C: Environment / Data / Schema / Memory Change
+### 7.2 Class-Aware Validation
 
-Examples: database migration, memory contract change, production config change,
-knowledge base wiring, release process change.
+- Class A: focused validation
+- Class B: focused + integration/smoke as needed
+- Class C: Class B + compatibility/migration/rollback readiness
+- Class D: Class C + authority/boundary impact review + rollback drill
 
-### Class D: Self-Evolution or Auto-Modification Rule Change
+### 7.3 Class D Governance Sign-Off
 
-Examples: changing what the system may rewrite automatically, changing what
-agents may mutate directly, changing review bypass rules.
+Class D changes affect what the system can modify about itself. These require:
+
+1. **Explicit governance sign-off** — not implicit pass. The controller must
+   produce a written sign-off that addresses:
+   - what authority/boundary/mutation scope is being changed
+   - what the rollback path is
+   - why the change is justified
+   - what monitoring will verify the change is safe
+
+2. **No silent delegation** — the sign-off cannot be delegated to the same
+   agent that implemented the change.
+
+3. **No direct production landing** — Class D must go through staging/sandbox
+   first.
+
+4. **Rollback drill or equivalent** — for meaningful Class D changes, a
+   rollback drill or equivalent confidence-building validation is required.
 
 ## 8. Agent Operating Model
 
@@ -661,18 +739,32 @@ The controller may not:
 
 ## 9. Delivery Format Requirements
 
+### 9.0 Artifact Chain Fields (All Artifacts)
+
+Every artifact (brief, result, review, test, promotion) should carry:
+
+- `task_id`: unique identifier for the task (e.g., `T-2026-0419-001`)
+- `change_id`: reference to the change unit (links related artifacts)
+- `parent_artifact`: reference to the preceding artifact in the chain
+- `decision_by`: who made the gate decision
+- `decided_at`: when the decision was made
+
+These fields enable **audit trail reconstruction**: from any promotion record,
+you can trace back through the full artifact chain to the original design brief.
+
 ### 9.1 Design Brief
 
 Required fields (adjust depth by tier):
 
-1. `problem_statement` (T1: goal)
-2. `proposed_approach` (T1: plan)
-3. `scope_boundary` (T1: non-goals)
-4. `affected_files` (T2+)
-5. `constraints` (T2+)
-6. `success_criteria` (T2+)
-7. `stop_conditions` (T2+)
-8. `change_class` (all tiers)
+1. `task_id` (all tiers)
+2. `change_class` (all tiers)
+3. `problem_statement` (T1: goal)
+4. `proposed_approach` (T1: plan)
+5. `scope_boundary` (T1: non-goals)
+6. `affected_files` (T2+)
+7. `constraints` (T2+)
+8. `success_criteria` (T2+)
+9. `stop_conditions` (T2+)
 
 ### 9.2 Implementation Result
 
@@ -703,11 +795,20 @@ Required fields (adjust depth by tier):
 
 ### 9.5 Promotion Record (T2+)
 
-1. `scope_summary`
-2. `validation_evidence`
-3. `git_checkpoint`
-4. `rollback_pointer`
-5. `post_promotion_verification`
+1. `task_id`
+2. `change_id`
+3. `parent_artifact` (link to test result)
+4. `scope_summary`
+5. `build_version`
+6. `promoted_from` (e.g., staging)
+7. `promoted_to` (e.g., production)
+8. `pre_promotion_evidence`
+9. `validation_evidence`
+10. `git_checkpoint`
+11. `rollback_pointer`
+12. `monitoring_baseline` (what signals to watch post-promotion)
+13. `post_promotion_verification`
+14. `decision_by`
 
 ### 9.6 Blocked Report (Any Stage)
 
@@ -814,16 +915,34 @@ Key rules summarized here:
 
 ## 14. Environment Separation
 
-Production quality requires environment separation. At minimum:
+Production quality requires environment separation. The required zones
+scale with project level and governance tier.
+
+### 14.1 Environment Matrix
+
+| Environment         | L1 / T1           | L2 / T2            | L3 / T3 / Class D    |
+|---------------------|--------------------|---------------------|-----------------------|
+| Development         | Required           | Required            | Required              |
+| Runtime (local)     | Often same as dev  | Recommended         | Required              |
+| Sandbox / Evolution | --                 | Optional            | Required              |
+| Staging             | --                 | Recommended         | Required              |
+| Production          | Often same as dev  | Required            | Required              |
+
+### 14.2 Promotion Paths
+
+- **L1/T1**: dev -> production (direct allowed)
+- **L2/T2**: dev -> staging -> production (direct-to-prod prohibited)
+- **L3/T3/Class D**: dev -> sandbox -> staging -> production
+  (sandbox-to-prod prohibited, staging must validate first)
+
+### 14.3 Environment Rules
 
 1. **Development**: mutable, used for feature work and local debugging.
-2. **Staging** (T2+): release-candidate validation before production.
-3. **Production**: stable, only reviewed and promoted behavior.
-4. **Sandbox/Evolution** (T3): isolated experimentation environment.
-
-T1 projects may operate with development + production only.
-T2 projects should have development + staging + production.
-T3 projects should have all four zones.
+2. **Sandbox/Evolution**: isolated experimentation. Especially important for
+   agent/memory/orchestration projects where boundary changes and self-evolution
+   proposals need safe testing before reaching production.
+3. **Staging**: release-candidate validation before production.
+4. **Production**: stable, only reviewed and promoted behavior.
 
 ## 15. Rollback Discipline
 
@@ -867,10 +986,11 @@ Milestone criteria:
 
 | Document                        | Purpose                                              |
 |---------------------------------|------------------------------------------------------|
-| `STAGE_GATES_REFERENCE.md`      | Quick-reference card for all 7 gates                 |
+| `STAGE_GATES_REFERENCE.md`      | Quick-reference card for all 7 gates and gate profiles |
 | `MONITORING_FEEDBACK_LOOP.md`   | Closed-loop specification                            |
-| `AGENT_ROLE_MATRIX.md`          | Multi-agent role mapping (scale-up reference)        |
+| `AGENT_ROLE_MATRIX.md`          | Role mapping: single-agent + multi-agent reference   |
 | `AI_GUARDRAILS.md`              | AI-specific controls and guardrails                  |
 | `CHECKLISTS.md`                 | Stage-by-stage checklists per governance tier        |
 | `TEMPLATES.md`                  | Fill-in-the-blank task, design, incident templates   |
 | `RUNBOOKS.md`                   | Step-by-step release, rollback, incident runbooks    |
+| `agents.md`                     | Drop-in agent operating prompt for any project       |

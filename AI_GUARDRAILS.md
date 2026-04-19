@@ -111,6 +111,35 @@ least one durable asset:
 
 "Fixed in code only" is not sufficient closure.
 
+### Rule 8: Class D Requires Explicit Governance Sign-Off
+
+Changes that affect what the system can modify about itself (Class D) must
+have a written governance sign-off that addresses:
+
+- what authority, boundary, or mutation scope is being changed
+- why the change is justified
+- what the rollback path is
+- what monitoring will verify the change is safe
+
+Class D changes:
+- always force T3 and R3
+- may not land directly to production
+- may not self-accept
+- may not silently delegate approval authority
+- require rollback drill or equivalent confidence validation
+
+### Rule 9: Environment Boundaries for Agent Projects
+
+Agent, memory, and orchestration projects (Type C) must respect environment
+boundaries. Many dangerous failures in these systems are not code bugs but
+"boundary drift" — the agent starts modifying surfaces it should not touch,
+or self-evolution proposals bypass normal review.
+
+For Type C projects:
+- sandbox/evolution environment is recommended even at L2
+- boundary changes (Class D) must be tested in sandbox before staging
+- memory contract changes must be validated in isolation before merging
+
 ## 3. High-Frequency AI Risk Catalog
 
 The controller should actively watch for these patterns:
@@ -125,6 +154,8 @@ The controller should actively watch for these patterns:
 | 6 | Memory contamination | Stale/wrong/speculative content stored as truth | Memory written without review |
 | 7 | State transition gaps | Workflow enters undefined states or cannot exit | Stuck states, orphan tasks |
 | 8 | Runtime-only patching | Issues treated as isolated bugs, not system inputs | No durable improvement after fix |
+| 9 | Boundary drift | Agent modifies surfaces it should not touch | Unexpected mutations, permission creep |
+| 10 | Authority escalation | Self-evolution proposals bypass review | Auto-modification without sign-off |
 
 ## 4. AI-Specific Design Questions
 

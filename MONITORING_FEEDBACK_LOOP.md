@@ -100,12 +100,15 @@ When a monitoring signal at level `critical`, `warning`, or `degraded` is
 detected:
 
 1. **Check for duplicates**: search for an existing open task with the same
-   source and category. If found, update it with latest evidence.
+   `source_type` and `source_id`. If found, update it with latest evidence
+   instead of creating a new task.
 
 2. **Create structured task**:
 
    ```
    source:           <monitoring system identifier>
+   source_type:      job | route | connector | loop | memory | scheduler | alert | complaint
+   source_id:        <unique signal identifier for dedup and traceability>
    signal_level:     critical | warning | degraded
    evidence:         <log entries, health snapshots, metric values>
    affected_surface: <component, route, or path impacted>
@@ -247,13 +250,17 @@ through at least an abbreviated stage chain.
 Auto-evolution or self-modification proposals triggered by monitoring must
 go through the full stage chain. They may not self-accept.
 
-### 7.4 Resolution Verification
+### 7.4 Resolution Verification (Health-Based Closure)
 
 After a corrective action is deployed:
 
 1. Monitoring must verify the originating signal returns to healthy.
 2. If the signal persists, the task remains open and is re-escalated.
-3. Resolution confirmed when healthy for at least 3 consecutive check cycles.
+3. **Closure rule**: an issue is not closed merely because code was deployed.
+   Resolution is confirmed only when the relevant signal is healthy for
+   **3 consecutive observation cycles**, or an explicitly justified equivalent.
+4. For T1 projects, manual observation across 3 time-separated checks is
+   acceptable as the equivalent.
 
 ### 7.5 Feedback Loop Health Metrics
 

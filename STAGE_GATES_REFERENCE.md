@@ -1,11 +1,11 @@
 # Stage Gates Reference Card
 
-Quick-reference for all lifecycle stage gates with tier applicability.
+Quick-reference for all lifecycle stage gates, gate profiles, and tier applicability.
 For full details, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 
 ## Minimum Gates by Governance Template
 
-| Gate | Name               | T1 (Lightweight)    | T2 (Standard)       | T3 (Reinforced)    |
+| Gate | Name               | G-Lite (T1)         | G-Std (T2)          | G-Full (T3)        |
 |------|--------------------|---------------------|---------------------|--------------------|
 | G1   | Design Complete    | Lite brief          | Standard brief      | Full brief + alts  |
 | G2   | Design Approved    | Self-check          | Role-switch review  | Full review        |
@@ -14,6 +14,32 @@ For full details, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 | G5   | Testing Passed     | Focused check       | Standard tests      | Full test suite    |
 | G6   | Production Deployed| Simple deploy       | Staged deploy       | Full promotion     |
 | G7   | Monitoring Active  | Basic health        | Standard monitoring | Full monitoring    |
+
+## Gate Profiles
+
+Gate profiles bridge governance tiers to concrete gate requirements.
+The tier selects the profile; the profile defines what each gate demands.
+
+| Profile  | Maps To | Philosophy                                    | When to Use                              |
+|----------|---------|-----------------------------------------------|------------------------------------------|
+| **G-Lite** | T1    | Minimal viable governance                     | One-off, low-risk, easily reversible     |
+| **G-Std**  | T2    | Balanced governance for persistent work       | Most L2 work, standard risk              |
+| **G-Full** | T3    | Maximum governance for high-risk changes      | L2+R3, L3, Class C/D                     |
+
+**Class override**: Change class can force a higher profile regardless of
+base tier. See `AI_CODING_LIFECYCLE_GOVERNANCE.md` Section 3.4.
+
+### Profile Selection Algorithm
+
+```
+1. Determine Project Level (L1/L2/L3)
+2. Determine Project Type (A/B/C/D)
+3. Determine Change Risk (R1/R2/R3)
+4. Determine Change Class (A/B/C/D)
+5. Select base template from Level + Risk -> T1/T2/T3
+6. Apply class override (Class B->min T2, C->min T2/T3, D->force T3)
+7. Map template to gate profile (T1->G-Lite, T2->G-Std, T3->G-Full)
+```
 
 ---
 
@@ -35,14 +61,15 @@ For full details, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 
 ### T2 Standard Brief Fields
 
-1. `problem_statement`
-2. `proposed_approach`
-3. `scope_boundary` (in-scope + out-of-scope)
-4. `affected_files`
-5. `constraints`
-6. `success_criteria`
-7. `stop_conditions`
-8. `change_class` (A / B / C / D)
+1. `task_id`
+2. `change_class` (A / B / C / D)
+3. `problem_statement`
+4. `proposed_approach`
+5. `scope_boundary` (in-scope + out-of-scope)
+6. `affected_files`
+7. `constraints`
+8. `success_criteria`
+9. `stop_conditions`
 
 ### T3 Full Brief: All T2 fields plus
 
@@ -88,11 +115,14 @@ For full details, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 
 ### Implementation Result Fields
 
-1. `summary`
-2. `files_changed`
-3. `validation_run`
-4. `known_risks`
-5. `recommendation` (accept / accept_with_changes / reject / blocked)
+1. `task_id`
+2. `change_id`
+3. `parent_artifact` (link to approved design brief)
+4. `summary`
+5. `files_changed`
+6. `validation_run`
+7. `known_risks`
+8. `recommendation` (accept / accept_with_changes / reject / blocked)
 
 ---
 
@@ -187,7 +217,7 @@ For full details, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 ## Quick Decision Flowchart
 
 ```
-1. Classify: What is the project level, type, risk, and governance tier?
+1. Classify: What is the project level, type, risk, change class, and gate profile?
    -> T1 / T2 / T3
 
 2. Design brief complete (per tier requirements)?

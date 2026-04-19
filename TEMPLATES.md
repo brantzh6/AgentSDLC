@@ -9,10 +9,13 @@ For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 
 ```md
 ## Task Classification
+- Task ID:
 - Project Level: L_
 - Project Type: _
 - Change Risk: R_
+- Change Class: _
 - Governance Template: T1
+- Gate Profile: G-Lite
 
 ## Goal
 -
@@ -37,10 +40,13 @@ For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 
 ```md
 ## Task Classification
+- Task ID:
 - Project Level: L_
 - Project Type: _
 - Change Risk: R_
+- Change Class: _
 - Governance Template: T2
+- Gate Profile: G-Std
 
 ## Background
 -
@@ -66,9 +72,6 @@ For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 ## Stop Conditions
 -
 
-## Change Class
-- A / B / C / D
-
 ## Plan
 -
 
@@ -89,10 +92,13 @@ For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 
 ```md
 ## Task Classification
+- Task ID:
 - Project Level: L_
 - Project Type: _
 - Change Risk: R_
+- Change Class: _
 - Governance Template: T3
+- Gate Profile: G-Full
 
 ## Current State
 -
@@ -141,6 +147,9 @@ For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 
 ```md
 ## Implementation Result
+- Task ID:
+- Change ID:
+- Parent Artifact: <link to approved design brief>
 
 ### Summary
 -
@@ -157,12 +166,16 @@ For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 
 ### Recommendation
 - accept / accept_with_changes / reject / blocked
+- Decision by:
 ```
 
 ## 5. Review Result Template
 
 ```md
 ## Review Result
+- Task ID:
+- Change ID:
+- Parent Artifact: <link to implementation result>
 
 ### Findings (ordered by severity)
 1.
@@ -175,12 +188,16 @@ For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 
 ### Recommendation
 - approve / approve_with_changes / reject
+- Decision by:
 ```
 
 ## 6. Test Result Template
 
 ```md
 ## Test Result
+- Task ID:
+- Change ID:
+- Parent Artifact: <link to review result>
 
 ### Test Suite
 - pass / fail
@@ -228,12 +245,29 @@ For quick validation notes (T1/T2):
 
 ```md
 ## Promotion Record
+- Task ID:
+- Change ID:
+- Parent Artifact: <link to test result>
 
 ### Scope Summary
 -
 
+### Build / Version
+-
+
+### Promoted From
+- (e.g., staging)
+
+### Promoted To
+- (e.g., production)
+
 ### Review Status
 - approved / approved_with_changes
+
+### Pre-Promotion Evidence
+- Design review: passed / date
+- Code review: passed / date
+- Validation: passed / date
 
 ### Validation Evidence
 -
@@ -245,20 +279,23 @@ For quick validation notes (T1/T2):
 ### Rollback Pointer
 -
 
-### Environment Target
-- staging / production
-
 ### Backup Status
 -
 
+### Monitoring Baseline
+- Key signals to watch:
+- Expected healthy range:
+
 ### Promotion Decision
 - accept / accept_with_changes / reject / defer
+- Decision by:
 
 ### Post-Promotion Verification
 - Health endpoint:
 - Main path:
 - Regression surface:
 - Rollback path valid:
+- 3 healthy observation cycles: pending / confirmed
 ```
 
 ## 10. Incident Closure Template
@@ -268,9 +305,17 @@ For quick validation notes (T1/T2):
 
 ### Identity
 - Incident ID:
+- Change ID: (if related to a specific change)
 - Date/Time:
 - Severity: SEV-1 / SEV-2 / SEV-3 / SEV-4
 - Owner:
+
+### Structured Signal
+- Source:
+- Source Type:
+- Source ID:
+- Signal Level:
+- Category:
 
 ### Discovery
 - Source:
@@ -334,7 +379,38 @@ For governance rules learned through incidents:
 - How this rule is checked:
 ```
 
-## 12. Blocked Report Template
+
+## 13. Controller-Coded Exception Template
+
+When the controller directly edits production code instead of delegating:
+
+```md
+## Controller-Coded Exception
+- Task ID:
+- Change ID:
+
+### What Was Changed
+-
+
+### Why Delegation Was Not Used
+-
+
+### Scope Confirmation
+- [ ] Change is small and bounded
+- [ ] OR: time-sensitive incident requires immediate action
+
+### Self-Acceptance Prevention
+- [ ] Review was performed from a different perspective
+- [ ] Review was not rubber-stamped
+
+### Validation
+- command:
+- result:
+
+### Known Risks
+-
+```
+## 14. Blocked Report Template
 
 ```md
 ## Blocked Report
