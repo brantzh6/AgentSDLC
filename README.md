@@ -88,7 +88,6 @@ AgentSDLC/
 │
 └── reference/                      ← samples and cross-references
     ├── model-routing-policy-pack/  ← sample: task→model routing rules
-    └── cross-check-chatgpt/        ← ChatGPT v1/v2 governance comparison
 ```
 
 ---
@@ -131,7 +130,6 @@ AgentSDLC/
 | Document | What It Does |
 |----------|-------------|
 | [`reference/model-routing-policy-pack/`](reference/model-routing-policy-pack/) | **Sample:** Project-level task→model routing rules. Shows how to map task types to specific models with escalation criteria. |
-| [`reference/cross-check-chatgpt/`](reference/cross-check-chatgpt/) | Cross-analysis between this framework and ChatGPT's independent governance design. |
 
 ---
 
