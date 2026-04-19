@@ -9,7 +9,7 @@
 AgentSDLC is project-agnostic. To use it, you **instantiate** it for your
 specific project by:
 
-1. Filling in `PROJECT_PROFILE.md` with your project's real values
+1. Filling in `instantiation/PROJECT_PROFILE.md` with your project's real values
 2. Adopting or merging `agents.md` into your project's agent operating contract
 3. Verifying alignment between your existing rules and the framework
 
@@ -45,7 +45,7 @@ Use these to determine your **default gate profile**:
 
 ### Step 2: Fill PROJECT_PROFILE.md
 
-Copy `PROJECT_PROFILE.md` from this repository into your project root.
+Copy `instantiation/PROJECT_PROFILE.md` from this repository into your project root.
 Fill in every section:
 
 | Section | Required? | What to Fill |
@@ -118,7 +118,7 @@ If any are missing, document them as TODOs in the profile.
 
 After completing the above, verify:
 
-- [ ] `PROJECT_PROFILE.md` exists at project root with all required sections
+- [ ] `instantiation/PROJECT_PROFILE.md` exists at project root with all required sections
 - [ ] All gaps are documented as explicit TODOs
 - [ ] Your agent contract includes the key governance items
 - [ ] Environment separation meets or documents the minimum
@@ -160,7 +160,7 @@ If your project has a runtime watchdog or health monitor:
 
 If your project already has strong agent rules:
 - Don't duplicate — reference the framework for items not yet covered
-- Add `PROJECT_PROFILE.md` for the operational parameters
+- Add `instantiation/PROJECT_PROFILE.md` for the operational parameters
 - Add classification + gate profile awareness to the existing contract
 
 ---

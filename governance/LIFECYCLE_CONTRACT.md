@@ -746,7 +746,7 @@ In multi-agent mode:
 - delegates recommend, only the controller decides
 - no delegate may accept its own output
 - no delegate may bypass the controller's gate decision
-- see `AGENT_ROLE_MATRIX.md` for full handoff protocols
+- see `governance/AGENT_ROLES.md` for full handoff protocols
 
 ### 8.3 Role Boundaries (Both Modes)
 
@@ -930,7 +930,7 @@ Anything not directly checked, run, or validated must be marked as
 ## 13. AI-Specific Guardrails
 
 AI coding projects have failure modes that normal software checklists do not
-cover. See `AI_GUARDRAILS.md` for the complete set of AI-specific controls.
+cover. See `governance/GUARDRAILS.md` for the complete set of AI-specific controls.
 
 Key rules summarized here:
 
@@ -1017,13 +1017,14 @@ Milestone criteria:
 
 | Document                        | Purpose                                              |
 |---------------------------------|------------------------------------------------------|
-| `STAGE_GATES_REFERENCE.md`      | Quick-reference card for all 7 gates and gate profiles |
-| `MONITORING_FEEDBACK_LOOP.md`   | Closed-loop specification                            |
-| `AGENT_ROLE_MATRIX.md`          | Role mapping: single-agent + multi-agent reference   |
-| `AI_GUARDRAILS.md`              | AI-specific controls and guardrails                  |
-| `CHECKLISTS.md`                 | Stage-by-stage checklists per governance tier        |
-| `TEMPLATES.md`                  | Fill-in-the-blank task, design, incident templates   |
-| `RUNBOOKS.md`                   | Step-by-step release, rollback, incident runbooks    |
+| `governance/STAGE_GATES.md`      | Quick-reference card for all 7 gates and gate profiles |
+| `governance/MONITORING_FEEDBACK.md`   | Closed-loop specification                            |
+| `governance/AGENT_ROLES.md`          | Role mapping: single-agent + multi-agent reference   |
+| `governance/GUARDRAILS.md`              | AI-specific controls and guardrails                  |
+| `operations/CHECKLISTS.md`                 | Stage-by-stage checklists per governance tier        |
+| `operations/TEMPLATES.md`                  | Fill-in-the-blank task, design, incident templates   |
+| `operations/RUNBOOKS.md`                   | Step-by-step release, rollback, incident runbooks    |
 | `agents.md`                     | Drop-in agent operating prompt for any project       |
-| `PROJECT_PROFILE.md`            | Per-project instantiation template                   |
-| `INSTANTIATION_GUIDE.md`        | How to apply this framework to a real project        |
+| `instantiation/PROJECT_PROFILE.md`            | Per-project instantiation template                   |
+| `instantiation/GUIDE.md`        | How to apply this framework to a real project        |
+| `reference/model-routing-policy-pack/` | Sample: project-level task→model routing rules  |

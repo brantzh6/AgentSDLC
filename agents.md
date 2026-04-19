@@ -262,10 +262,11 @@ From any promotion record, you can trace back to the original design brief.
 
 ## 12. References
 
-- `AI_CODING_LIFECYCLE_GOVERNANCE.md` — full governance contract
-- `STAGE_GATES_REFERENCE.md` — gate details and profiles
-- `MONITORING_FEEDBACK_LOOP.md` — closed-loop specification
-- `AI_GUARDRAILS.md` — AI-specific controls
-- `CHECKLISTS.md` — per-stage checklists
-- `TEMPLATES.md` — delivery templates
-- `RUNBOOKS.md` — operational runbooks
+- `governance/LIFECYCLE_CONTRACT.md` — full governance contract
+- `governance/STAGE_GATES.md` — gate details and profiles
+- `governance/MONITORING_FEEDBACK.md` — closed-loop specification
+- `governance/GUARDRAILS.md` — AI-specific controls
+- `operations/CHECKLISTS.md` — per-stage checklists
+- `operations/TEMPLATES.md` — delivery templates
+- `operations/RUNBOOKS.md` — operational runbooks
+- `reference/model-routing-policy-pack/` — sample: task→model routing rules

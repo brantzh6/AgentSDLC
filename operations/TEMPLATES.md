@@ -3,7 +3,7 @@
 Fill-in-the-blank templates for structured task execution. Use the shortest
 version that still preserves clarity for the selected governance tier.
 
-For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
+For full lifecycle context, see `governance/LIFECYCLE_CONTRACT.md`.
 
 ## 1. T1 Lightweight Task Template
 

@@ -4,7 +4,7 @@ Practical checklists organized by governance tier (T1/T2/T3) for each
 lifecycle stage. Use these to avoid missing key quality controls without
 requiring heavy process.
 
-For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
+For full lifecycle context, see `governance/LIFECYCLE_CONTRACT.md`.
 
 ## 1. Classification Checklist
 

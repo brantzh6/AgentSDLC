@@ -1,7 +1,7 @@
 # Stage Gates Reference Card
 
 Quick-reference for all lifecycle stage gates, gate profiles, and tier applicability.
-For full details, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
+For full details, see `governance/LIFECYCLE_CONTRACT.md`.
 
 ## Minimum Gates by Governance Template
 
@@ -29,7 +29,7 @@ The tier selects the profile; the profile defines what each gate demands.
 | **G-Full** | T3    | Maximum governance for high-risk changes      | L2+R3, L3, Class C/D                     |
 
 **Class override**: Change class can force a higher profile regardless of
-base tier. See `AI_CODING_LIFECYCLE_GOVERNANCE.md` Section 3.4.
+base tier. See `governance/LIFECYCLE_CONTRACT.md` Section 3.4.
 
 ### Profile Selection Algorithm
 

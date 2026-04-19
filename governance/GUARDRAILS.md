@@ -5,7 +5,7 @@ software governance. These risks are unique to systems involving agents, tool
 calling, workflows, memory, stateful planning, orchestration, and mixed
 deterministic/model-driven behavior.
 
-For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
+For full lifecycle context, see `governance/LIFECYCLE_CONTRACT.md`.
 
 ## 1. Why AI Projects Need Special Rules
 

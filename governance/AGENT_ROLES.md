@@ -5,7 +5,7 @@ This document defines the agent operating model for the lifecycle.
 **Default mode: single controller agent with role-switching.**
 Multi-agent delegation is a scale-up path, not the baseline assumption.
 
-For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
+For full lifecycle context, see `governance/LIFECYCLE_CONTRACT.md`.
 
 ## 1. Single-Agent Operating Mode (Default)
 

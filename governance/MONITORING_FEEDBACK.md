@@ -4,7 +4,7 @@ This document defines the closed-loop mechanism that connects runtime
 monitoring (Stage 7) back to design (Stage 1), making the development
 lifecycle continuous and self-correcting.
 
-For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
+For full lifecycle context, see `governance/LIFECYCLE_CONTRACT.md`.
 
 ## Tier Applicability
 
@@ -211,7 +211,7 @@ For T1 projects, these SLAs are aspirational targets, not strict requirements.
 
 ### 6.1 Required for SEV-1 and SEV-2
 
-See `RUNBOOKS.md` for the post-incident review template.
+See `operations/RUNBOOKS.md` for the post-incident review template.
 
 Key outputs:
 

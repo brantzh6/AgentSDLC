@@ -3,7 +3,7 @@
 Step-by-step guides for release, rollback, and incident handling.
 These are action-oriented — follow the steps in order.
 
-For full lifecycle context, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
+For full lifecycle context, see `governance/LIFECYCLE_CONTRACT.md`.
 
 ## 1. Release Runbook
 
