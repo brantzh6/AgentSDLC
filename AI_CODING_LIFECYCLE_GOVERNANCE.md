@@ -1,7 +1,7 @@
 # AI Coding Lifecycle Governance Contract
 
-Status: v3
-Version: 3.0
+Status: v3.1
+Version: 3.1
 
 ## 1. Purpose and Scope
 
@@ -217,8 +217,8 @@ Design -> Design Review -> Code Implementation -> Code Review -> Testing -> Go-t
                                           (Feedback Loop)
 ```
 
-Not every task passes through every stage. The governance template determines
-the gate profile requirements (see Section 3.4).
+All 7 gates apply to every task. The gate profile determines the
+strictness and acceptance form of each gate (see Section 3.4).
 
 ### Stage 1: Design
 

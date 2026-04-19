@@ -407,6 +407,15 @@ When the controller directly edits production code instead of delegating:
 - command:
 - result:
 
+### Rollback Pointer
+- How to undo:
+- Rollback verified: [ ] yes / [ ] not applicable
+
+### Reviewer / Approver
+- Reviewed by: _(must not be the same perspective as the implementer)_
+- Approved by:
+- Approved at:
+
 ### Known Risks
 -
 ```
