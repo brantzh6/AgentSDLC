@@ -1025,3 +1025,5 @@ Milestone criteria:
 | `TEMPLATES.md`                  | Fill-in-the-blank task, design, incident templates   |
 | `RUNBOOKS.md`                   | Step-by-step release, rollback, incident runbooks    |
 | `agents.md`                     | Drop-in agent operating prompt for any project       |
+| `PROJECT_PROFILE.md`            | Per-project instantiation template                   |
+| `INSTANTIATION_GUIDE.md`        | How to apply this framework to a real project        |

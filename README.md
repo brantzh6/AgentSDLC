@@ -78,6 +78,8 @@ Multi-agent delegation (separate architect, coding, review, test agents) is desc
 |------|---------|
 | [`AI_CODING_LIFECYCLE_GOVERNANCE.md`](AI_CODING_LIFECYCLE_GOVERNANCE.md) | **Main contract.** Stage definitions, gate criteria, tiering, change classification, gate profiles, agent model, delivery formats, incident response, environment separation, rollback discipline. |
 | [`agents.md`](agents.md) | **Drop-in agent prompt.** Copy-paste-ready operating prompt for any project's controller agent. |
+| [`PROJECT_PROFILE.md`](PROJECT_PROFILE.md) | **Instantiation template.** Per-project profile with environment matrix, connectors, validation commands, health endpoints. |
+| [`INSTANTIATION_GUIDE.md`](INSTANTIATION_GUIDE.md) | **Setup guide.** Step-by-step process for applying AgentSDLC to any project. |
 | [`STAGE_GATES_REFERENCE.md`](STAGE_GATES_REFERENCE.md) | **Quick reference card.** Gate profiles (G-Lite/G-Std/G-Full), entry/exit criteria per tier, decision matrices. |
 | [`MONITORING_FEEDBACK_LOOP.md`](MONITORING_FEEDBACK_LOOP.md) | **Closed-loop spec.** Signal schema, issue-to-task conversion, three handling paths, severity SLAs, health-based closure. |
 | [`AGENT_ROLE_MATRIX.md`](AGENT_ROLE_MATRIX.md) | **Role mapping.** Single-agent role-switching guide + multi-agent scale-up reference. |
