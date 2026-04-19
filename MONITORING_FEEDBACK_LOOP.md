@@ -146,7 +146,7 @@ For well-understood, bounded issues:
 
 1. System generates a minimal design brief.
 2. The brief is submitted to Gate G2 (controller approval required).
-3. If approved, proceed through the gate chain per governance tier.
+3. If approved, proceed through all 7 gates at the profile-determined strictness.
 
 #### Path B: Controller-Escalated (Manual Triage)
 

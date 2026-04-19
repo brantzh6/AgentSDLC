@@ -127,6 +127,9 @@ Class D changes:
 - may not self-accept
 - may not silently delegate approval authority
 - require rollback drill or equivalent confidence validation
+- **require human sign-off by default** — in single-agent mode, the
+  controller prepares a sign-off draft, but the final approval must come
+  from a human. Without human sign-off, the change stays in sandbox/staging.
 
 ### Rule 9: Environment Boundaries for Agent Projects
 

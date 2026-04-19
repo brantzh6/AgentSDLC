@@ -160,20 +160,27 @@ Default assumption if unclear: **Class B**.
 
 ### 3.5 Governance Template Selection
 
-| Template | Name        | When to Use                            | Gate Profile | Gate Chain              |
-|----------|-------------|----------------------------------------|-------------|-------------------------|
-| T1       | Lightweight | L1 + R1/R2, or L2 + R1                | G-Lite      | G1-lite + G3 + G5-lite  |
-| T2       | Standard    | L2 + R2, L1 + R3, most persistent work | G-Std       | G1 + G3 + G4 + G5 + G6 |
-| T3       | Reinforced  | L2 + R3, L3 + any, blast-radius high  | G-Full      | All gates (G1-G7)       |
+| Template | Name        | When to Use                            | Gate Profile |
+|----------|-------------|----------------------------------------|-------------|
+| T1       | Lightweight | L1 + R1/R2, or L2 + R1                | G-Lite      |
+| T2       | Standard    | L2 + R2, L1 + R3, most persistent work | G-Std       |
+| T3       | Reinforced  | L2 + R3, L3 + any, blast-radius high  | G-Full      |
+
+**All 7 gates (G1-G7) always exist.** The gate profile determines the
+**strictness and acceptance form** of each gate, not whether it exists.
+A G-Lite gate is still passed — it is just passed in a lighter form
+(self-check instead of full review, focused check instead of full test suite).
 
 **Gate profiles** bridge the gap between flexible tiering and structured gates:
 
-- **G-Lite**: minimal gate chain — brief design, implement, focused check.
+- **G-Lite**: all 7 gates in lightweight form — self-check reviews,
+  focused validation, simple deployment, basic monitoring.
   Suitable for bounded, easily reversible work.
 - **G-Std**: standard gate chain — structured design, role-switch review,
   implement, code review, standard test, staged deploy.
   Suitable for most persistent project work.
-- **G-Full**: full gate chain — all 7 gates with strongest requirements.
+- **G-Full**: all 7 gates in full rigor — dedicated reviews,
+  full test suites, full promotion chain, full monitoring.
   Required for high-risk, Class C/D, or production-critical changes.
 
 After selecting a base template from `Level + Risk`, apply the change-class
@@ -211,7 +218,7 @@ Design -> Design Review -> Code Implementation -> Code Review -> Testing -> Go-t
 ```
 
 Not every task passes through every stage. The governance template determines
-the minimum required gate chain (see Section 3.4).
+the gate profile requirements (see Section 3.4).
 
 ### Stage 1: Design
 
@@ -624,13 +631,19 @@ Tasks that require code changes re-enter the lifecycle at Stage 1:
 
 ## 6. Stage Gate Summary
 
-### 6.1 Gate Profiles and Minimum Gates
+### 6.1 Gate Profiles — What Each Gate Requires
 
-| Template | Gate Profile | G1 Design | G2 Review | G3 Implement | G4 Code Review | G5 Test | G6 Deploy | G7 Monitor |
-|----------|-------------|-----------|-----------|-------------|----------------|---------|-----------|------------|
-| T1       | G-Lite      | Lite      | Self-check| Required    | Self-check     | Focused | Simple    | Basic      |
-| T2       | G-Std       | Standard  | Role-switch| Required   | Role-switch    | Standard| Staged    | Standard   |
-| T3       | G-Full      | Full      | Full      | Required    | Full           | Full    | Full chain| Full       |
+All 7 gates always apply. The profile determines the form, not the existence.
+
+| Gate | Name               | G-Lite (T1)          | G-Std (T2)           | G-Full (T3)         |
+|------|--------------------|----------------------|----------------------|---------------------|
+| G1   | Design Complete    | Lite brief           | Standard brief       | Full brief + alts   |
+| G2   | Design Approved    | Self-check           | Role-switch review   | Full review         |
+| G3   | Implementation Done| Required             | Required             | Required            |
+| G4   | Code Review Passed | Self-check           | Role-switch review   | Full review         |
+| G5   | Testing Passed     | Focused check        | Standard tests       | Full test suite     |
+| G6   | Production Deployed| Simple deploy        | Staged deploy        | Full promotion chain|
+| G7   | Monitoring Active  | Basic health         | Standard monitoring  | Full monitoring     |
 
 ### 6.2 Gate Reference
 
@@ -674,20 +687,26 @@ control requirements per class.
 
 Class D changes affect what the system can modify about itself. These require:
 
-1. **Explicit governance sign-off** — not implicit pass. The controller must
-   produce a written sign-off that addresses:
+1. **Human sign-off required by default.** In single-agent mode, the controller
+   may prepare a sign-off draft, but the final sign-off must come from a human
+   operator. Without human sign-off, the change must stay in sandbox/staging
+   and may not enter production. This rule may only be relaxed when a project
+   has an explicit, documented exemption with compensating controls.
+
+2. **Explicit governance sign-off** — not implicit pass. The sign-off must
+   address:
    - what authority/boundary/mutation scope is being changed
    - what the rollback path is
    - why the change is justified
    - what monitoring will verify the change is safe
 
-2. **No silent delegation** — the sign-off cannot be delegated to the same
+3. **No silent delegation** — the sign-off cannot be delegated to the same
    agent that implemented the change.
 
-3. **No direct production landing** — Class D must go through staging/sandbox
+4. **No direct production landing** — Class D must go through staging/sandbox
    first.
 
-4. **Rollback drill or equivalent** — for meaningful Class D changes, a
+5. **Rollback drill or equivalent** — for meaningful Class D changes, a
    rollback drill or equivalent confidence-building validation is required.
 
 ## 8. Agent Operating Model
@@ -739,18 +758,29 @@ The controller may not:
 
 ## 9. Delivery Format Requirements
 
-### 9.0 Artifact Chain Fields (All Artifacts)
+### 9.0 Artifact Chain Schema (All Artifacts)
 
-Every artifact (brief, result, review, test, promotion) should carry:
+Every artifact (brief, result, review, test, promotion) must carry the
+following **unified artifact fields**. This is the minimum schema that
+enables audit trail reconstruction.
 
-- `task_id`: unique identifier for the task (e.g., `T-2026-0419-001`)
-- `change_id`: reference to the change unit (links related artifacts)
-- `parent_artifact`: reference to the preceding artifact in the chain
-- `decision_by`: who made the gate decision
-- `decided_at`: when the decision was made
+| Field              | Type     | Description                                           |
+|--------------------|----------|-------------------------------------------------------|
+| `task_id`          | Required | Unique task identifier (e.g., `T-2026-0419-001`)     |
+| `change_id`        | Required | Change unit reference (links related artifacts)        |
+| `change_class`     | Required | A / B / C / D at time of artifact creation             |
+| `gate_profile`     | Required | G-Lite / G-Std / G-Full                                |
+| `parent_artifact`  | Required | Reference to preceding artifact in the chain           |
+| `decision`         | Required | Gate outcome (approve / reject / conditional / blocked)|
+| `decision_by`      | Required | Who made the gate decision (role or identity)          |
+| `decided_at`       | Required | When the decision was made                             |
+| `evidence`         | T2+      | Pointer to validation output or test result            |
+| `known_risks`      | T2+      | Residual risks carried forward                         |
+| `rollback_pointer` | T2+      | How to undo this artifact's effect                     |
 
-These fields enable **audit trail reconstruction**: from any promotion record,
-you can trace back through the full artifact chain to the original design brief.
+**Audit trail rule**: from any promotion record, it must be possible to
+trace back through the full artifact chain to the original design brief.
+If any link in the chain is missing, the promotion record is incomplete.
 
 ### 9.1 Design Brief
 
@@ -824,7 +854,8 @@ Required fields (adjust depth by tier):
 3. **Direct experimental patch to production**: T2/T3 must go through staging.
 4. **Mixed promotion units**: unrelated fixes must not be bundled.
 5. **Self-evolution auto-promotion**: auto-modification must go through full review.
-6. **Gate skipping**: no required gate may be skipped for the selected tier.
+6. **Gate completeness**: all 7 gates apply to every change. The gate
+   profile determines the strictness of each gate, not whether it applies.
 7. **Silent scope broadening**: if scope expands, stop and report.
 8. **Validation-free acceptance**: missing validation = accept_with_changes or reject.
 9. **Undocumented hotfixes**: even emergency fixes must produce a result.

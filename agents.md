@@ -69,9 +69,13 @@ deletion/permission, core connector, core agent loop, production incident repair
 Class overrides:
 - Class B -> minimum T2 for persistent projects
 - Class C -> minimum T2, usually T3 for L2/L3
-- Class D -> force R3 and T3, no self-acceptance, no direct production landing
+- Class D -> force R3 and T3, no self-acceptance, no direct production landing,
+  **human sign-off required** (controller prepares draft, human approves)
 
 Do not proceed with substantial work until classification is written.
+
+All 7 gates (G1-G7) always exist. The gate profile determines the
+strictness of each gate, not whether it applies.
 
 ---
 

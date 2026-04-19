@@ -35,11 +35,13 @@ Use the lightest governance that still preserves correctness, verification, roll
 
 Not every task needs the full ceremony. AgentSDLC uses three tiers:
 
-| Tier | Name        | Gate Profile | When to Use                                      | Gate Chain              |
-|------|-------------|-------------|--------------------------------------------------|-------------------------|
-| T1   | Lightweight | G-Lite      | One-off scripts, low-risk fixes, small personal tasks | G1-lite + G3 + G5-lite |
-| T2   | Standard    | G-Std       | Persistent personal projects, most normal work   | G1 + G3 + G4 + G5 + G6 |
-| T3   | Reinforced  | G-Full      | High-risk changes, state/memory/core-loop work   | All gates (G1-G7)       |
+| Tier | Name        | Gate Profile | When to Use                                      |
+|------|-------------|-------------|--------------------------------------------------|
+| T1   | Lightweight | G-Lite      | One-off scripts, low-risk fixes, small personal tasks |
+| T2   | Standard    | G-Std       | Persistent personal projects, most normal work   |
+| T3   | Reinforced  | G-Full      | High-risk changes, state/memory/core-loop work   |
+
+All 7 gates (G1-G7) always exist. The gate profile determines the **strictness** of each gate, not whether it applies.
 
 The tier is selected by classifying the project and task across **four dimensions**:
 
@@ -60,7 +62,7 @@ Design -> Design Review -> Code Implementation -> Code Review -> Testing -> Go-t
                                           (Feedback Loop)
 ```
 
-Every change must pass through the gates required by its governance tier. No agent may accept its own work without explicit role-switching review.
+Every change passes through all 7 gates. The gate profile determines the strictness of each gate. No agent may accept its own work without explicit role-switching review.
 
 ## Single-Agent vs Multi-Agent
 
@@ -114,7 +116,7 @@ Follow the operating contract in AI_CODING_LIFECYCLE_GOVERNANCE.md.
 - Standard feature work, runtime behavior change
 ```
 
-### 3. Follow the tier-appropriate gate chain
+### 3. Pass all 7 gates at the tier-appropriate strictness
 
 - **T1**: Brief design -> implement -> focused test -> deploy
 - **T2**: Design -> role-switch review -> implement -> code review -> test -> staged deploy

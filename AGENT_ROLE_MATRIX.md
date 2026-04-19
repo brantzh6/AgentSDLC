@@ -185,7 +185,8 @@ The controller must escalate to the human operator when:
 
 - SEV-1 not resolved within 30 minutes
 - SEV-2 not resolved within 4 hours
-- a change requires Class D (self-evolution rule change)
+- a change requires Class D (self-evolution rule change) — human sign-off is
+  mandatory by default for Class D
 - a decision conflicts with documented architecture
 - rollback needed but rollback artifacts are missing
 

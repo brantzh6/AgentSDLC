@@ -5,15 +5,17 @@ For full details, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
 
 ## Minimum Gates by Governance Template
 
-| Gate | Name               | G-Lite (T1)         | G-Std (T2)          | G-Full (T3)        |
-|------|--------------------|---------------------|---------------------|--------------------|
-| G1   | Design Complete    | Lite brief          | Standard brief      | Full brief + alts  |
-| G2   | Design Approved    | Self-check          | Role-switch review  | Full review        |
-| G3   | Implementation Done| Required            | Required            | Required           |
-| G4   | Code Review Passed | Self-check          | Role-switch review  | Full review        |
-| G5   | Testing Passed     | Focused check       | Standard tests      | Full test suite    |
-| G6   | Production Deployed| Simple deploy       | Staged deploy       | Full promotion     |
-| G7   | Monitoring Active  | Basic health        | Standard monitoring | Full monitoring    |
+All 7 gates always apply. The profile determines the form, not the existence.
+
+| Gate | Name               | G-Lite (T1)          | G-Std (T2)           | G-Full (T3)         |
+|------|--------------------|----------------------|----------------------|---------------------|
+| G1   | Design Complete    | Lite brief           | Standard brief       | Full brief + alts   |
+| G2   | Design Approved    | Self-check           | Role-switch review   | Full review         |
+| G3   | Implementation Done| Required             | Required             | Required            |
+| G4   | Code Review Passed | Self-check           | Role-switch review   | Full review         |
+| G5   | Testing Passed     | Focused check        | Standard tests       | Full test suite     |
+| G6   | Production Deployed| Simple deploy        | Staged deploy        | Full promotion chain|
+| G7   | Monitoring Active  | Basic health         | Standard monitoring  | Full monitoring     |
 
 ## Gate Profiles
 
