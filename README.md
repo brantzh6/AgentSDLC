@@ -4,9 +4,11 @@ A comprehensive lifecycle governance framework for AI agent-driven software deve
 
 ## What is this?
 
-When AI coding agents (GPT, Claude, Gemini, Qwen, etc.) work on a real project, they face a fundamental quality problem: **changes accumulate fast, but review, testing, and governance do not keep up.**
+When AI coding agents work on a real project, they face a fundamental quality problem: **changes accumulate fast, but review, testing, and governance do not keep up.**
 
 AgentSDLC provides a complete operating contract that a **development controller agent** can follow to enforce quality across the full software development lifecycle — from design to production monitoring, and back again.
+
+The framework is **right-sized by default**: it scales from lightweight single-agent personal projects to reinforced multi-agent team workflows.
 
 ## The Problem It Solves
 
@@ -17,87 +19,123 @@ Without governance, AI coding projects tend to:
 - Skip testing for "small" changes that turn out to break things
 - Lose the ability to roll back when something goes wrong
 - Accumulate monitoring debt until production issues become invisible
+- Fake completion with vague language ("should work", "probably fixed")
 
-AgentSDLC prevents these failure modes by defining **7 stages, 7 gates, and 1 closed feedback loop**.
+AgentSDLC prevents these failure modes with **7 stages, 7 gates, governance tiering, and 1 closed feedback loop**.
+
+## Key Design Principle
+
+> **The goal is disciplined evolution, not maximum process.**
+
+Use the lightest governance that still preserves correctness, verification, rollback ability, and runtime learning.
+
+## Governance Tiering
+
+Not every task needs the full ceremony. AgentSDLC uses three tiers:
+
+| Tier | Name        | When to Use                                      | Gate Chain              |
+|------|-------------|--------------------------------------------------|-------------------------|
+| T1   | Lightweight | One-off scripts, low-risk fixes, small personal tasks | G1-lite + G3 + G5-lite |
+| T2   | Standard    | Persistent personal projects, most normal work   | G1 + G3 + G4 + G5 + G6 |
+| T3   | Reinforced  | High-risk changes, state/memory/core-loop work   | All gates (G1-G7)       |
+
+The tier is selected by classifying the project and task:
+
+- **Project Level**: L1 (one-off) / L2 (persistent personal) / L3 (multi-user)
+- **Project Type**: A (script) / B (app/API) / C (AI agent/workflow) / D (integration)
+- **Change Risk**: R1 (low) / R2 (medium) / R3 (high)
 
 ## The Lifecycle
 
 ```
-Design → Design Review → Code Implementation → Code Review → Testing → Go-to-Production → Runtime Monitoring
-  ↑                                                                                              |
-  └──────────────────────────────────── Feedback Loop ───────────────────────────────────────────┘
+Design -> Design Review -> Code Implementation -> Code Review -> Testing -> Go-to-Production -> Runtime Monitoring
+  ^                                                                                                    |
+  |____________________________________________________________________________________________________|
+                                          (Feedback Loop)
 ```
 
-Every change must pass through stage gates (G1–G7). No gate may be skipped. No agent may accept its own work.
+Every change must pass through the gates required by its governance tier. No agent may accept its own work without explicit role-switching review.
+
+## Single-Agent vs Multi-Agent
+
+**Default: single controller agent with role-switching.**
+
+Most personal AI projects are operated by a single agent that switches between designer, reviewer, implementer, tester, and operator perspectives. This is the baseline assumption.
+
+Multi-agent delegation (separate architect, coding, review, test agents) is described as a **scale-up path** for when cross-agent coordination becomes technically practical.
 
 ## Document Structure
 
 | File | Purpose |
 |------|---------|
-| [`AI_CODING_LIFECYCLE_GOVERNANCE.md`](AI_CODING_LIFECYCLE_GOVERNANCE.md) | **Main contract.** Full stage definitions, gate criteria, change classification, agent roles, delivery formats, incident response, environment separation, rollback discipline. |
-| [`STAGE_GATES_REFERENCE.md`](STAGE_GATES_REFERENCE.md) | **Quick reference card.** At-a-glance gate entry/exit criteria, decision matrices, required test levels by change class. |
-| [`MONITORING_FEEDBACK_LOOP.md`](MONITORING_FEEDBACK_LOOP.md) | **Closed-loop spec.** Signal classification, issue-to-task conversion, three task paths (auto/controller/incident), severity SLAs, post-incident review. |
-| [`AGENT_ROLE_MATRIX.md`](AGENT_ROLE_MATRIX.md) | **Role mapping.** Stage participation matrix, decision authority, handoff protocols, escalation rules, pipeline depth limits. |
+| [`AI_CODING_LIFECYCLE_GOVERNANCE.md`](AI_CODING_LIFECYCLE_GOVERNANCE.md) | **Main contract.** Stage definitions, gate criteria, tiering, change classification, agent model, delivery formats, incident response, environment separation, rollback discipline. |
+| [`STAGE_GATES_REFERENCE.md`](STAGE_GATES_REFERENCE.md) | **Quick reference card.** At-a-glance gate entry/exit criteria per tier, decision matrices, required test levels. |
+| [`MONITORING_FEEDBACK_LOOP.md`](MONITORING_FEEDBACK_LOOP.md) | **Closed-loop spec.** Signal classification, issue-to-task conversion, three task paths, severity SLAs. |
+| [`AGENT_ROLE_MATRIX.md`](AGENT_ROLE_MATRIX.md) | **Role mapping.** Single-agent role-switching guide + multi-agent scale-up reference. |
+| [`AI_GUARDRAILS.md`](AI_GUARDRAILS.md) | **AI-specific controls.** Fake completion prevention, context drift, memory contamination, loop exit behavior. |
+| [`CHECKLISTS.md`](CHECKLISTS.md) | **Stage checklists.** Per-tier checklists for design, review, validation, release, monitoring, closed-loop. |
+| [`TEMPLATES.md`](TEMPLATES.md) | **Fill-in-the-blank templates.** Task cards, design briefs, implementation results, incident closure, rule cards. |
+| [`RUNBOOKS.md`](RUNBOOKS.md) | **Step-by-step guides.** Release, rollback, and incident handling runbooks. |
 
 ## Quick Start
 
 ### 1. Give the contract to your controller agent
-
-Add the main governance document to your agent's system prompt or project-level instructions:
 
 ```
 You are the development controller for this project.
 Follow the operating contract in AI_CODING_LIFECYCLE_GOVERNANCE.md.
 ```
 
-### 2. Define your agent roles
+### 2. Classify every task before starting
 
-Use the role template in [`AGENT_ROLE_MATRIX.md` §7](AGENT_ROLE_MATRIX.md#7-agent-contract-template) to create contracts for each agent role in your project:
+```md
+## Task Classification
+- Project Level: L2
+- Project Type: C
+- Change Risk: R2
+- Governance Template: T2
 
-- **Controller** — coordinates lifecycle, makes gate decisions
-- **Architect Agent** — design analysis, option comparison
-- **Coding Agent** — bounded implementation
-- **Code Review Agent** — patch review, regression detection
-- **Test Fixer Agent** — test repair, validation
-- **Refactor Agent** — structural cleanup
+## Why
+- Persistent personal project
+- AI agent/workflow system
+- Standard feature work
+```
 
-### 3. Classify your changes
+### 3. Follow the tier-appropriate gate chain
 
-Every change gets a class that determines the minimum gate requirements:
+- **T1**: Brief design -> implement -> focused test -> deploy
+- **T2**: Design -> role-switch review -> implement -> code review -> test -> staged deploy
+- **T3**: Full design with alternatives -> full review -> implement -> full review -> full test -> full promotion chain -> full monitoring
 
-| Class | Scope | Example | Minimum Gates |
-|-------|-------|---------|---------------|
-| **A** | Safe local change | Bug fix, doc correction | G1 (lightweight) + G3 + G4 + G5 |
-| **B** | Runtime behavior change | New API route, state machine change | All gates (G1–G6) |
-| **C** | Environment / data / schema | DB migration, config change | All gates + enhanced validation |
-| **D** | Self-evolution rule change | Agent boundary modification | All gates + maximum scrutiny |
+### 4. Use the checklists and templates
 
-### 4. Enforce the feedback loop
+Copy the appropriate template from `TEMPLATES.md` and use the matching checklist from `CHECKLISTS.md` at each stage.
 
-When monitoring detects an issue, it follows one of three paths back into design:
+### 5. Enforce the feedback loop
 
-- **Path A (Auto):** Well-understood, bounded fix → auto-generate design brief → controller approves → standard lifecycle
-- **Path B (Controller):** Requires judgment → controller triages → design brief or defer
-- **Path C (Incident):** Production down → immediate hotfix → post-incident review within 24h → permanent fix enters lifecycle
+When monitoring detects an issue, it follows one of three paths:
 
-### 5. Track governance health
+- **Path A (Auto)**: Bounded fix -> controller approves brief -> standard lifecycle
+- **Path B (Controller)**: Controller triages -> design brief or defer
+- **Path C (Incident)**: Immediate hotfix -> post-incident review within 24h
 
-Key metrics from the framework:
+### 6. Track governance health
 
 | Metric | Target | Red Flag |
 |--------|--------|----------|
 | Gate skip rate | 0% | Any skip |
-| Self-acceptance rate | 0% | Any self-accept |
-| Promotion without staging | 0% | Any direct-to-prod |
-| Post-incident review rate | 100% (SEV-1/2) | Any missing |
+| Self-acceptance without role-switch | 0% | Any rubber-stamp |
+| Promotion without staging (T2+) | 0% | Any direct-to-prod |
+| Durable improvement per incident | 1+ | Zero improvements |
 
 ## Core Principles
 
-1. **Controller coordinates, does not code.** The controller writes briefs and makes gate decisions, not production code.
-2. **No self-acceptance.** Every output is a candidate until reviewed by the controller.
+1. **Disciplined evolution, not maximum process.** Right-size governance to the task.
+2. **No self-acceptance.** Review must use a different perspective, even in single-agent mode.
 3. **Bounded work.** One task, one scope, one result. If scope expands, stop and report.
-4. **Evidence-based promotion.** Changes become promotable only after passing the full gate chain.
-5. **Rollback is always possible.** If you can't go back, you're not under control.
+4. **Evidence over assertion.** Claims must be backed by validation, not vague language.
+5. **Rollback is always possible.** If you cannot go back, you are not under control.
+6. **Incidents become improvements.** Every runtime issue produces at least one durable control.
 
 ## Adapting to Your Project
 
@@ -111,11 +149,11 @@ This framework is **project-agnostic**. It does not assume any specific:
 
 To adapt it:
 
-1. Keep the stage definitions and gate criteria as-is (they are the governance backbone).
-2. Customize the monitoring signal sources table for your infrastructure.
-3. Adjust check intervals and SLAs to match your project's scale.
-4. Add project-specific forbidden shortcuts if needed.
-5. Define concrete validation commands for each gate in your project context.
+1. Start with T1 or T2 based on your project level and risk.
+2. Use the task classification block before every non-trivial task.
+3. Customize monitoring signal sources for your infrastructure.
+4. Adjust check intervals and SLAs to your project's scale.
+5. Gradually adopt templates and runbooks as the project grows.
 
 ## License
 

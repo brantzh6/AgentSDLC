@@ -1,20 +1,39 @@
 # Stage Gates Reference Card
 
-Quick-reference for all lifecycle stage gates. For full details, see
-`AI_CODING_LIFECYCLE_GOVERNANCE.md`.
+Quick-reference for all lifecycle stage gates with tier applicability.
+For full details, see `AI_CODING_LIFECYCLE_GOVERNANCE.md`.
+
+## Minimum Gates by Governance Template
+
+| Gate | Name               | T1 (Lightweight)    | T2 (Standard)       | T3 (Reinforced)    |
+|------|--------------------|---------------------|---------------------|--------------------|
+| G1   | Design Complete    | Lite brief          | Standard brief      | Full brief + alts  |
+| G2   | Design Approved    | Self-check          | Role-switch review  | Full review        |
+| G3   | Implementation Done| Required            | Required            | Required           |
+| G4   | Code Review Passed | Self-check          | Role-switch review  | Full review        |
+| G5   | Testing Passed     | Focused check       | Standard tests      | Full test suite    |
+| G6   | Production Deployed| Simple deploy       | Staged deploy       | Full promotion     |
+| G7   | Monitoring Active  | Basic health        | Standard monitoring | Full monitoring    |
+
+---
 
 ## Gate G1: Design Complete
 
-| Field           | Requirement                                                         |
-|-----------------|---------------------------------------------------------------------|
-| Entry criteria  | Clear problem statement or monitoring-generated task exists          |
-| Required inputs | Problem statement, scope boundary, change classification            |
-| Required output | Design brief with all 8 required fields populated                   |
-| Pass condition  | Brief has scope, constraints, success criteria, and change class    |
-| Decision by     | Controller                                                          |
-| Escalation      | If problem is ambiguous, escalate to human operator before drafting |
+| Field           | T1                | T2                     | T3                         |
+|-----------------|-------------------|------------------------|----------------------------|
+| Required output | Lite brief (5 fields) | Standard brief (8 fields) | Full brief + alternatives |
+| Pass condition  | Goal + risk + rollback | All 8 fields populated | All T2 + current state + options |
+| Decision by     | Controller        | Controller             | Controller                 |
 
-### Design Brief Required Fields
+### T1 Lite Brief Fields
+
+1. `goal`
+2. `non_goals`
+3. `main_risk`
+4. `validation_approach`
+5. `rollback_note`
+
+### T2 Standard Brief Fields
 
 1. `problem_statement`
 2. `proposed_approach`
@@ -25,121 +44,87 @@ Quick-reference for all lifecycle stage gates. For full details, see
 7. `stop_conditions`
 8. `change_class` (A / B / C / D)
 
+### T3 Full Brief: All T2 fields plus
+
+9. `current_state_analysis`
+10. `alternative_approaches` (min 2)
+11. `trade_offs_per_approach`
+12. `monitoring_strategy`
+13. `failure_handling_strategy`
+
 ---
 
 ## Gate G2: Design Approved
 
-| Field           | Requirement                                                           |
-|-----------------|-----------------------------------------------------------------------|
-| Entry criteria  | Design brief passes G1                                                |
-| Required inputs | Design brief, project mainline context                                |
-| Required output | Design review result with findings, risk assessment, recommendation   |
-| Pass condition  | Controller explicitly approves or approves_with_changes               |
-| Decision by     | Controller (architect-agent recommends)                               |
-| Escalation      | If blocked, escalate blocker to human operator                        |
+| Field           | T1                   | T2                      | T3                     |
+|-----------------|----------------------|-------------------------|------------------------|
+| Review type     | Self-check           | Role-switching review   | Full independent review|
+| Pass condition  | No obvious flaws     | Explicit approve result | Findings addressed     |
+| Decision by     | Controller           | Controller              | Controller             |
 
-### Design Review Result Required Fields
+### T1 Self-Check Questions
+
+- Understood correctly?
+- Simpler approach available?
+- Hidden assumptions?
+- Over-designed?
+
+### T2/T3 Review Result Fields
 
 1. `findings` (ordered by severity)
 2. `open_questions`
-3. `risk_assessment`
-4. `recommendation` (approve / approve_with_changes / reject / blocked)
-
-### Decision Matrix
-
-| Recommendation       | Controller Action                    |
-|----------------------|--------------------------------------|
-| approve              | Proceed to Stage 3                   |
-| approve_with_changes | Update brief, then proceed           |
-| reject               | Return to Stage 1 with findings      |
-| blocked              | Escalate blocker                     |
+3. `risk_assessment` (T3)
+4. `recommendation` (approve / conditional_approve / reject)
 
 ---
 
 ## Gate G3: Implementation Complete
 
-| Field           | Requirement                                                          |
-|-----------------|----------------------------------------------------------------------|
-| Entry criteria  | Design brief passes G2                                               |
-| Required inputs | Approved design brief, context files                                 |
-| Required output | Implementation result with all 6 required fields populated           |
-| Pass condition  | Validation executed, no placeholder sections, result is structured   |
-| Decision by     | Coding agent signals completion; controller verifies completeness    |
-| Escalation      | If blocked, return blocked report with what_was_attempted            |
+| Field           | All Tiers                                            |
+|-----------------|------------------------------------------------------|
+| Required output | Implementation result with summary, files, validation |
+| Pass condition  | Validation executed, no placeholders                  |
+| Decision by     | Controller                                            |
 
-### Implementation Result Required Fields
+### Implementation Result Fields
 
 1. `summary`
 2. `files_changed`
-3. `commit_hash`
-4. `validation_run`
-5. `known_risks`
-6. `recommendation` (accept / accept_with_changes / reject / blocked)
-
-### Completeness Check
-
-- All 6 required sections must be populated (not empty or placeholder).
-- Validation commands from the design brief must have been executed.
-- If blocked, the result must clearly state the blocker.
+3. `validation_run`
+4. `known_risks`
+5. `recommendation` (accept / accept_with_changes / reject / blocked)
 
 ---
 
 ## Gate G4: Code Review Passed
 
-| Field           | Requirement                                                          |
-|-----------------|----------------------------------------------------------------------|
-| Entry criteria  | Implementation result passes G3                                      |
-| Required inputs | Implementation result, design brief, changed files                   |
-| Required output | Code review result with findings, validation gaps, recommendation    |
-| Pass condition  | Controller explicitly accepts; all blockers resolved                 |
-| Decision by     | Controller (code-review-agent recommends)                            |
-| Escalation      | If reject, return to Stage 3 or Stage 1 depending on finding scope  |
-
-### Code Review Result Required Fields
-
-1. `findings` (ordered by severity)
-2. `open_questions`
-3. `validation_gaps`
-4. `recommendation` (accept / accept_with_changes / reject)
+| Field           | T1                   | T2                      | T3                     |
+|-----------------|----------------------|-------------------------|------------------------|
+| Review type     | Self-check           | Role-switching review   | Full review            |
+| Pass condition  | No obvious bugs      | Findings addressed      | All items resolved     |
+| Decision by     | Controller           | Controller              | Controller             |
 
 ### Review Priority Order
 
-1. Behavioral regressions (highest priority)
+1. Behavioral regressions
 2. Incorrect assumptions about data / API / state
 3. Scope creep beyond the design brief
 4. Missing validation
 5. Security or stability concerns
-
-### Decision Matrix
-
-| Recommendation       | Controller Action                    |
-|----------------------|--------------------------------------|
-| accept               | Proceed to Stage 5                   |
-| accept_with_changes  | Fix issues, re-review, then proceed  |
-| reject               | Return to Stage 3 or Stage 1        |
+6. State machine closure (T3)
+7. Retry/timeout/fallback safety (T3)
 
 ---
 
 ## Gate G5: Testing Passed
 
-| Field           | Requirement                                                          |
-|-----------------|----------------------------------------------------------------------|
-| Entry criteria  | Implementation passes G4                                             |
-| Required inputs | Implementation result, changed files, existing test suite            |
-| Required output | Test result with suite results, new tests, coverage, gaps            |
-| Pass condition  | All required test levels executed, no critical failures              |
-| Decision by     | Controller (test-fixer-agent executes)                               |
-| Escalation      | If fail, return to Stage 3 with root cause analysis                  |
+| Field           | T1                   | T2                      | T3                     |
+|-----------------|----------------------|-------------------------|------------------------|
+| Test scope      | Focused check        | Standard suite          | Full suite + integration|
+| Pass condition  | Main path + 1 failure| No regressions + focused| All levels for class   |
+| Decision by     | Controller           | Controller              | Controller             |
 
-### Test Result Required Fields
-
-1. `test_suite_result` (pass / fail with counts)
-2. `new_tests_added`
-3. `regression_surface_covered`
-4. `known_gaps`
-5. `recommendation` (pass / pass_with_gaps / fail)
-
-### Required Test Levels by Change Class
+### Required Test Levels by Change Class (T2/T3)
 
 | Change Class | Compile | Unit Tests | Integration | Smoke | Migration | Rollback Drill |
 |-------------|---------|------------|-------------|-------|-----------|----------------|
@@ -148,80 +133,45 @@ Quick-reference for all lifecycle stage gates. For full details, see
 | C           | Yes     | Focused    | Yes         | Yes   | Yes       | Feasibility    |
 | D           | Yes     | Focused    | Yes         | Yes   | Yes       | Full drill     |
 
-### Decision Matrix
-
-| Recommendation    | Controller Action                              |
-|-------------------|------------------------------------------------|
-| pass              | Proceed to Stage 6                             |
-| pass_with_gaps    | Accept gaps explicitly, then proceed           |
-| fail              | Return to Stage 3 with root cause              |
-
 ---
 
 ## Gate G6: Production Deployed
 
-| Field           | Requirement                                                          |
-|-----------------|----------------------------------------------------------------------|
-| Entry criteria  | Change passes G5 + pre-promotion checklist satisfied                 |
-| Required inputs | All prior artifacts, staging environment, production environment     |
-| Required output | Promotion record with all 9 required fields                         |
-| Pass condition  | Staging + prod validation passed, rollback path confirmed            |
-| Decision by     | Controller                                                           |
-| Escalation      | If staging fails, return to Stage 3; if prod fails, trigger rollback |
+| Field           | T1                   | T2                      | T3                     |
+|-----------------|----------------------|-------------------------|------------------------|
+| Deploy method   | Direct deploy        | Staged (dev->stg->prod) | Full promotion chain   |
+| Pass condition  | Main path works      | Staging + prod validated| Full verification      |
+| Decision by     | Controller           | Controller              | Controller             |
 
-### Pre-Promotion Checklist
+### T2/T3 Pre-Promotion Checklist
 
 1. Scope frozen
-2. Review complete and archived
+2. Review complete
 3. Validation complete with evidence
-4. Result documents written
-5. Git checkpoint exists (commit + tag)
-6. Rollback pointer exists
-7. Environment target explicit
-8. Backup readiness confirmed
-9. Promotion decision explicit from controller
-
-### Promotion Record Required Fields
-
-1. `scope_summary`
-2. `review_status`
-3. `validation_evidence`
-4. `git_checkpoint` (commit + tag)
-5. `rollback_pointer`
-6. `environment_target`
-7. `backup_status`
-8. `promotion_decision` (accept / accept_with_changes / reject / defer)
-9. `post_promotion_verification`
-
-### Post-Promotion Verification
-
-- Health endpoint checked
-- Canonical runtime path checked
-- Key regression surface checked
-- Rollback path still valid
+4. Git checkpoint exists
+5. Rollback pointer exists
+6. Environment target explicit
+7. Backup readiness confirmed (T3)
 
 ---
 
 ## Gate G7: Monitoring Active (Continuous)
 
-| Field           | Requirement                                                          |
-|-----------------|----------------------------------------------------------------------|
-| Entry criteria  | Production deployment passes G6                                      |
-| Required inputs | Live production environment, monitoring configuration                |
-| Required output | Continuous health snapshots, structured issues, alerts               |
-| Pass condition  | N/A (continuous); triggers feedback loop when findings detected      |
-| Decision by     | Automated (controller for escalations)                               |
-| Escalation      | SEV-1/SEV-2 -> immediate controller action                          |
+| Field           | T1                   | T2                      | T3                     |
+|-----------------|----------------------|-------------------------|------------------------|
+| Monitoring scope| Basic health         | Standard checks         | Full monitoring layers |
+| Trigger         | Manual observation OK| Automated checks        | Automated + canaries   |
+| Decision by     | Controller           | Automated + controller  | Automated + controller |
 
-### Monitoring Layers
+### Monitoring Layers by Tier
 
-| Layer                  | Interval       | Scope                                    |
-|------------------------|----------------|------------------------------------------|
-| Health checks          | Every 1 min    | Service endpoints, critical path canaries |
-| Deep log analysis      | Every 15-60 min| Error patterns, performance trends        |
-| Self-test loops        | Every 10-30 min| Smoke tests, critical path validation     |
-| Scheduled evaluation   | Daily/weekly   | Resource performance, quality assessment  |
-| Daily reports          | Once per day   | Aggregated summaries, notifications       |
+| Layer                  | T1          | T2              | T3                |
+|------------------------|-------------|-----------------|-------------------|
+| Health checks          | Manual/basic| Every few min   | Every 1 min       |
+| Log analysis           | Manual      | Periodic        | Every 15-60 min   |
+| Self-test/smoke        | --          | Every 10-30 min | Every 10-30 min   |
+| Performance tracking   | --          | --              | Every 5 min       |
+| Daily reports          | --          | Optional        | Required          |
 
 ### Signal-to-Action Mapping
 
@@ -237,31 +187,37 @@ Quick-reference for all lifecycle stage gates. For full details, see
 ## Quick Decision Flowchart
 
 ```
-Is design brief complete with all 8 fields?
-  NO  -> Fix brief (stay at G1)
-  YES -> G1 passed -> submit for design review
+1. Classify: What is the project level, type, risk, and governance tier?
+   -> T1 / T2 / T3
 
-Is design review approved by controller?
-  NO  -> Fix brief or re-design (back to G1)
-  YES -> G2 passed -> delegate implementation
+2. Design brief complete (per tier requirements)?
+   NO  -> Fix brief (stay at G1)
+   YES -> G1 passed
 
-Is implementation result complete with validation?
-  NO  -> Complete implementation (stay at G3)
-  YES -> G3 passed -> submit for code review
+3. Design reviewed (per tier: self-check / role-switch / full)?
+   NO  -> Fix or re-design (back to G1)
+   YES -> G2 passed -> implement
 
-Is code review accepted by controller?
-  NO  -> Fix issues (back to G3) or re-design (back to G1)
-  YES -> G4 passed -> run tests
+4. Implementation result complete with validation?
+   NO  -> Complete implementation (stay at G3)
+   YES -> G3 passed
 
-Did all required test levels pass?
-  NO  -> Fix and re-test (back to G3)
-  YES -> G5 passed -> run pre-promotion checklist
+5. Code review passed (per tier)?
+   NO  -> Fix issues (back to G3) or re-design (back to G1)
+   YES -> G4 passed -> test
 
-Is pre-promotion checklist fully satisfied?
-  NO  -> Resolve missing items (stay at G6)
-  YES -> Deploy to staging -> validate -> deploy to prod -> verify
+6. Tests passed (per tier and change class)?
+   NO  -> Fix and re-test (back to G3)
+   YES -> G5 passed -> deploy
 
-Is production healthy?
-  NO  -> Trigger rollback or hotfix (SEV-1/SEV-2 path)
-  YES -> Monitor continuously -> findings trigger new G1
+7. Deploy and verify (per tier):
+   T1: deploy + check main path
+   T2: staging -> validate -> prod -> verify
+   T3: full promotion chain with observation window
+
+8. Monitor (per tier):
+   T1: basic health awareness
+   T2: automated checks
+   T3: full monitoring with canaries
+   -> findings trigger new G1
 ```

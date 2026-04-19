@@ -1,7 +1,7 @@
 # AI Coding Lifecycle Governance Contract
 
-Status: baseline
-Version: 1.0
+Status: v2
+Version: 2.0
 
 ## 1. Purpose and Scope
 
@@ -13,6 +13,7 @@ It governs:
 - how changes move from idea to production
 - what gates must be passed at each stage
 - who holds decision authority
+- how governance intensity scales with project size and risk
 - how runtime monitoring feeds back into new design work
 
 It does not govern:
@@ -35,6 +36,8 @@ unrecoverable and unmaintainable.
 
 2. No agent may accept its own work as final.
    - Every output is a candidate until reviewed by the controller.
+   - In single-agent mode, this means explicit role-switching between
+     "implementer" and "reviewer" perspectives.
 
 3. Work must be bounded.
    - One task, one scope, one result.
@@ -50,7 +53,7 @@ unrecoverable and unmaintainable.
 
 6. Promotion requires evidence.
    - No change enters production because an agent produced it.
-   - A change becomes promotable only after passing the full gate chain.
+   - A change becomes promotable only after passing the required gate chain.
 
 7. Rollback must always be possible.
    - If the project cannot return to a previously trusted state, it is not
@@ -64,7 +67,88 @@ unrecoverable and unmaintainable.
 - No architecture decisions made by delegate agents.
 - No unrelated fixes mixed into one change unit.
 
-## 3. Lifecycle Stage Definitions
+### 2.3 Right-Sized Governance
+
+The goal is **disciplined evolution, not maximum process**.
+
+- Use the lightest governance that still preserves correctness, verification,
+  rollback ability, and runtime learning.
+- Do not use enterprise-heavy process for trivial one-off work.
+- Do not treat persistent projects with a demo mindset.
+- Governance intensity must scale with project size, project type, and
+  change risk (see Section 3).
+
+## 3. Project Classification and Governance Tiering
+
+Before starting any task, the controller must classify the work along three
+dimensions and select the appropriate governance template.
+
+### 3.1 Project Level
+
+| Level | Name                   | Examples                                          |
+|-------|------------------------|---------------------------------------------------|
+| L1    | One-off / low-persist  | Temporary scripts, demos, one-time data jobs      |
+| L2    | Persistent personal    | Personal API, long-running agent, private system   |
+| L3    | Multi-user / high-loss | External service, shared system, deletion-capable  |
+
+Default assumption if unclear: **L2**.
+
+### 3.2 Project Type
+
+| Type | Name                       | Main Concerns                                         |
+|------|----------------------------|-------------------------------------------------------|
+| A    | Script / automation        | Input/output correctness, idempotency, retry safety   |
+| B    | App / API / website        | Main-path usability, compatibility, error handling     |
+| C    | AI agent / workflow system | Context correctness, state closure, fake completion    |
+| D    | Integration / data flow    | Protocol stability, timeout/retry, duplicate handling  |
+
+### 3.3 Change Risk
+
+| Risk | Name        | Examples                                                      |
+|------|-------------|---------------------------------------------------------------|
+| R1   | Low risk    | Docs, comments, tiny UI tweaks, non-behavioral cleanup        |
+| R2   | Medium risk | Standard feature, local logic change, prompt tuning           |
+| R3   | High risk   | State/memory logic, schema migration, core loop, permissions  |
+
+Default assumption if unclear: **R2**.
+
+**Automatic escalation to R3** when a task touches:
+
+- memory or long-term state
+- state machine or state transition rules
+- task orchestration or scheduler logic
+- persistence layout or migration
+- deletion paths or permission logic
+- core external connectors
+- main agent loop or control loop
+- production incident remediation
+
+### 3.4 Governance Template Selection
+
+| Template | Name        | When to Use                            | Gate Chain              |
+|----------|-------------|----------------------------------------|-------------------------|
+| T1       | Lightweight | L1 + R1/R2, or L2 + R1                | G1-lite + G3 + G5-lite  |
+| T2       | Standard    | L2 + R2, L1 + R3, most persistent work | G1 + G3 + G4 + G5 + G6 |
+| T3       | Reinforced  | L2 + R3, L3 + any, blast-radius high  | All gates (G1-G7)       |
+
+Default assumption if unclear: **T2**.
+
+### 3.5 Task Classification Output
+
+Before starting a task, the controller should produce:
+
+```
+## Task Classification
+- Project Level: L1 / L2 / L3
+- Project Type: A / B / C / D
+- Change Risk: R1 / R2 / R3
+- Governance Template: T1 / T2 / T3
+
+## Why
+- <concise reasons for the classification>
+```
+
+## 4. Lifecycle Stage Definitions
 
 The lifecycle consists of seven stages forming a continuous loop:
 
@@ -75,28 +159,44 @@ Design -> Design Review -> Code Implementation -> Code Review -> Testing -> Go-t
                                           (Feedback Loop)
 ```
 
+Not every task passes through every stage. The governance template determines
+the minimum required gate chain (see Section 3.4).
+
 ### Stage 1: Design
+
+**Tier applicability: T1 (lightweight brief), T2 (standard brief), T3 (full brief with alternatives)**
 
 Purpose: Define what will be built, why, and within what boundaries.
 
-Required activities:
+#### T1 Minimum Design
 
-1. Create a design brief containing:
-   - problem statement
-   - proposed approach
-   - scope boundary (what is in, what is out)
-   - affected files and surfaces
-   - constraints and assumptions
-   - success criteria
-   - stop conditions (when to abort)
+- goal
+- non-goals
+- main risk
+- validation approach
+- rollback note
 
-2. For non-trivial changes, produce an option analysis:
-   - at least two approaches compared
-   - trade-offs explicit
-   - risks identified per approach
-   - recommended path with justification
+#### T2 Standard Design
 
-3. Classify the change (see Section 6: Change Classification).
+- problem statement
+- proposed approach
+- scope boundary (in-scope, out-of-scope)
+- affected files and surfaces
+- constraints and assumptions
+- success criteria
+- stop conditions
+- change class
+
+#### T3 Full Design
+
+All T2 fields plus:
+- current state analysis
+- at least two alternative approaches compared
+- trade-offs explicit per approach
+- risks identified per approach
+- monitoring strategy
+- failure handling strategy
+- recommended path with justification
 
 Entry criteria:
 
@@ -105,37 +205,44 @@ Entry criteria:
 
 Exit criteria (Gate G1: Design Complete):
 
-- design brief exists with all required fields
+- design brief exists with all fields required for the selected tier
 - change class is determined
 - scope boundary is explicit
-- the brief is ready for review
 
-Responsible role: architect-agent or controller
+Responsible role: controller (with architect perspective)
 
 ### Stage 2: Design Review
 
+**Tier applicability: T1 (self-review), T2 (role-switching review), T3 (independent review)**
+
 Purpose: Validate the design before any implementation begins.
 
-Required activities:
+#### T1 Self-Review
 
-1. Review the design brief for:
-   - correctness of problem framing
-   - feasibility of proposed approach
-   - completeness of scope boundary
-   - risk identification quality
-   - alignment with project mainline and architecture
+The controller performs a quick self-check:
+- Is the goal understood correctly?
+- Is there a simpler approach?
+- Are there hidden assumptions?
+- Is this over-designed for the task size?
 
-2. Produce a design review result containing:
-   - findings ordered by severity
-   - open questions
-   - risk assessment
-   - recommendation: `approve`, `approve_with_changes`, `reject`, `blocked`
+#### T2 Role-Switching Review
 
-3. Controller makes the gate decision:
-   - `approve`: proceed to implementation
-   - `approve_with_changes`: update brief, then proceed
-   - `reject`: return to Stage 1 with findings
-   - `blocked`: escalate the blocker
+The controller switches to a reviewer perspective and checks:
+- Is the plan aligned with the actual goal?
+- Is complexity appropriate?
+- Are failure paths included?
+- Is it testable and monitorable?
+- Is the release/rollback realistic?
+
+Produce a review result: `approve`, `conditional_approve`, `reject`.
+
+#### T3 Full Design Review
+
+Same as T2 plus:
+- Are state transitions closed?
+- Are consistency risks addressed?
+- Are dependency failures handled?
+- Does the plan add uncontrolled operational burden?
 
 Entry criteria:
 
@@ -143,17 +250,18 @@ Entry criteria:
 
 Exit criteria (Gate G2: Design Approved):
 
-- design review result exists
-- controller has explicitly approved or approved_with_changes
-- if approved_with_changes, the brief has been updated
+- review result exists (even if self-review for T1)
+- controller has explicitly approved
 
-Responsible role: architect-agent (review), controller (decision)
+Responsible role: controller (reviewer perspective)
 
 ### Stage 3: Code Implementation
 
-Purpose: Produce the bounded code change described in the approved design brief.
+**Tier applicability: All tiers (T1/T2/T3)**
 
-Required activities:
+Purpose: Produce the bounded code change described in the approved design.
+
+Required activities (all tiers):
 
 1. Read the approved design brief and context files.
 2. Make the smallest safe patch that satisfies the brief.
@@ -161,10 +269,9 @@ Required activities:
 4. Produce a structured implementation result containing:
    - summary
    - files changed
-   - commit hash (if applicable)
    - validation run output
    - known risks
-   - recommendation: `accept`, `accept_with_changes`, `reject`, `blocked`
+   - recommendation
 
 Safe working pattern:
 
@@ -177,42 +284,51 @@ Safe working pattern:
 
 Entry criteria:
 
-- design brief has passed Gate G2
+- design brief has passed Gate G2 (or G1 self-review for T1)
 
 Exit criteria (Gate G3: Implementation Complete):
 
 - implementation result exists with all required sections populated
 - validation commands from the brief have been executed
-- no placeholder sections remain in the result
+- no placeholder sections remain
 
-Responsible role: coding-agent (implementation), controller (oversight)
+Responsible role: controller (implementer perspective)
 
 ### Stage 4: Code Review
+
+**Tier applicability: T1 (skip or self-check), T2 (role-switching review), T3 (full review)**
 
 Purpose: Verify the implementation for correctness, regressions, and scope
 discipline before testing.
 
-Required activities:
+#### T1 Minimal Check
 
-1. Review the implementation patch against the design brief for:
-   - behavioral regressions
-   - incorrect assumptions about data, API, or state
-   - scope creep beyond the brief
-   - missing validation
-   - security or stability concerns
+Quick self-check:
+- Does the code match the plan?
+- Any obvious bugs?
+- Did scope silently expand?
+- Are errors swallowed silently?
 
-2. Produce a code review result containing:
-   - findings ordered by severity
-   - open questions
-   - validation gaps
-   - recommendation: `accept`, `accept_with_changes`, `reject`
+#### T2 Role-Switching Review
 
-3. Distinguish blockers from polish items.
+The controller switches to reviewer perspective:
+- behavioral regressions
+- incorrect assumptions about data, API, or state
+- scope creep beyond the brief
+- missing validation
+- security or stability concerns
 
-4. Controller makes the gate decision:
-   - `accept`: proceed to testing
-   - `accept_with_changes`: fix and re-review
-   - `reject`: return to Stage 3 or Stage 1 with findings
+Produce a review result: `accept`, `accept_with_changes`, `reject`.
+
+#### T3 Full Review
+
+Same as T2 plus:
+- Is the state machine closed?
+- Are retries/timeouts/fallbacks safe?
+- Are consistency assumptions explicit?
+- Are external dependency failures handled?
+- Are monitoring hooks sufficient?
+- Is rollback genuinely executable?
 
 Entry criteria:
 
@@ -220,26 +336,41 @@ Entry criteria:
 
 Exit criteria (Gate G4: Code Review Passed):
 
-- code review result exists
-- controller has explicitly accepted or accepted_with_changes
-- if accepted_with_changes, fixes have been applied and re-verified
+- review result exists
+- all blockers resolved
 
-Responsible role: code-review-agent (review), controller (decision)
+Responsible role: controller (reviewer perspective)
 
 ### Stage 5: Testing
+
+**Tier applicability: T1 (focused check), T2 (standard testing), T3 (full testing)**
 
 Purpose: Verify the change works correctly and does not regress existing
 behavior.
 
-Required activities:
+#### T1 Focused Check
 
-1. Run existing test suite to confirm no regressions.
-2. Add or update tests for the changed behavior surface.
-3. Run focused tests covering the specific change.
-4. For runtime behavior changes (Class B+), run integration or smoke tests.
-5. For environment/data changes (Class C+), run migration validation.
+- main path manually exercised or spot-checked
+- 1-3 important scenarios verified
+- at least 1 failure scenario checked
 
-Test requirements by change class:
+#### T2 Standard Testing
+
+- existing test suite run (no regressions)
+- focused tests for the changed behavior
+- at least 1 regression check
+- at least 1 failure path
+
+#### T3 Full Testing
+
+All T2 plus:
+- integration tests
+- smoke tests against live-like environment
+- migration validation (if applicable)
+- rollback feasibility check (Class C+)
+- rollback drill (Class D)
+
+Test requirements by change class (for T2/T3):
 
 - Class A: compile check + focused unit tests
 - Class B: Class A + integration tests + smoke tests
@@ -250,108 +381,100 @@ Produce a test result containing:
 
 - test suite: pass/fail with counts
 - new tests added (list)
-- regression surface covered (description)
+- regression surface covered
 - known gaps
 - recommendation: `pass`, `pass_with_gaps`, `fail`
 
 Entry criteria:
 
-- implementation passes Gate G4
+- implementation passes Gate G4 (or G3 for T1)
 
 Exit criteria (Gate G5: Testing Passed):
 
 - test result exists
-- all required test levels for the change class have been executed
+- all required test levels for the tier and change class executed
 - no critical failures remain
-- if pass_with_gaps, gaps are explicitly documented and accepted by controller
 
-Responsible role: test-fixer-agent (execution), controller (acceptance)
+Responsible role: controller (tester perspective)
 
 ### Stage 6: Go-to-Production
 
-Purpose: Promote the validated change through staging into production safely.
+**Tier applicability: T1 (simple deploy + verify), T2 (staged deploy), T3 (full promotion chain)**
 
-Required activities:
+Purpose: Promote the validated change safely.
 
-1. Pre-promotion checklist:
-   - scope is frozen (no late additions)
-   - review is complete and archived
-   - validation is complete with evidence
-   - result documents are written
-   - git checkpoint exists (commit + tag if milestone)
-   - rollback pointer exists for risky changes
-   - environment target is explicit (staging or production)
-   - backup or restore readiness confirmed
-   - promotion decision is explicit from controller
+#### T1 Simple Deploy
 
-2. Staging deployment:
-   - deploy to staging environment
-   - run staging validation (health check, canonical paths, regression surface)
-   - confirm no regressions in staging
+- keep old version available
+- deploy the change
+- run main path after deploy
+- know rollback path
 
-3. Production promotion (only after staging acceptance):
-   - deploy to production environment
-   - run post-promotion validation
-   - confirm health endpoint, canonical paths, and key surfaces
+#### T2 Staged Deploy
 
-4. Post-promotion verification:
-   - health endpoint checked
-   - canonical runtime path checked
-   - key regression surface checked
-   - rollback path still valid
+- pre-promotion checklist (scope frozen, review done, validation done,
+  rollback pointer exists)
+- deploy to staging/test environment
+- validate in staging
+- promote to production
+- post-promotion verification
 
-Promotion order is strictly:
+#### T3 Full Promotion Chain
+
+All T2 plus:
+- staging validation with health check, canonical paths, regression surface
+- explicit observation window after production deploy
+- explicit stop conditions defined before promotion
+- rollback path confirmed valid at every step
+
+Promotion order (T2/T3):
 
 1. development -> staging
 2. staging -> production
 
-Direct development-to-production or sandbox-to-production is prohibited.
+Direct development-to-production is prohibited for T2/T3.
+T1 may deploy directly if the project has no staging environment.
 
 Entry criteria:
 
 - change passes Gate G5
-- all pre-promotion checklist items are satisfied
 
 Exit criteria (Gate G6: Production Deployed):
 
-- staging validation passed
-- production deployment completed
-- post-promotion verification passed
+- deployment completed
+- post-deployment verification passed
 - rollback path confirmed valid
 
-Responsible role: controller (decision and execution oversight)
+Responsible role: controller
 
 ### Stage 7: Runtime Monitoring
 
-Purpose: Continuously verify production health and detect issues that require
-corrective action.
+**Tier applicability: T1 (basic health), T2 (standard monitoring), T3 (full monitoring)**
 
-Required monitoring layers:
+Purpose: Continuously verify production health and detect issues.
 
-1. **Minute-level health checks**
-   - service health endpoints
-   - critical path canary tests
-   - rapid anomaly detection on recent logs
+#### T1 Basic Health
 
-2. **Periodic deep analysis** (every 15-60 minutes)
-   - log pattern analysis
-   - error trend detection
-   - performance regression detection
+At minimum, be able to answer:
+- Is it alive?
+- Are failures increasing?
+- Is the main task succeeding?
 
-3. **Self-test loops** (every 10-30 minutes)
-   - lightweight smoke tests against live services
-   - critical path validation (API health, chat canaries, UI probes)
-   - result converted to structured issues with priority classification
+#### T2 Standard Monitoring
 
-4. **Scheduled evaluation** (daily/weekly)
-   - source/resource performance evaluation
-   - collection health tracking
-   - quality assessment of managed resources
+- health endpoint checks (every few minutes)
+- log pattern analysis (periodic)
+- self-test loops (smoke tests against live services)
+- basic daily reports
 
-5. **Daily reports**
-   - aggregated error/warning counts
-   - important insights summary
-   - notification for critical or degraded states
+#### T3 Full Monitoring
+
+All T2 plus:
+- minute-level health checks with canary tests
+- deep log analysis (every 15-60 min)
+- scheduled evaluation (daily/weekly quality assessment)
+- performance regression detection
+- detailed daily reports with insights
 
 Monitoring output:
 
@@ -368,15 +491,15 @@ Exit criteria:
 
 - monitoring is continuous; it does not "pass"
 - when a monitoring finding requires action, it triggers the feedback loop
-  (see Section 4)
+  (see Section 5)
 
-Responsible role: monitoring system (automated), controller (escalation decisions)
+Responsible role: monitoring system (automated) or controller (manual for T1)
 
-## 4. The Closed Loop: Monitoring to Design
+## 5. The Closed Loop: Monitoring to Design
 
 This is the critical feedback mechanism that makes the lifecycle continuous.
 
-### 4.1 Signal Classification
+### 5.1 Signal Classification
 
 Monitoring signals are classified into four levels:
 
@@ -387,7 +510,7 @@ Monitoring signals are classified into four levels:
 | Degraded | Quality metrics below threshold                 | Within 1 day  |
 | Info     | Trend observation, no immediate action needed   | Next cycle    |
 
-### 4.2 Issue-to-Task Conversion
+### 5.2 Issue-to-Task Conversion
 
 When monitoring detects an actionable finding:
 
@@ -407,19 +530,19 @@ When monitoring detects an actionable finding:
    - degraded -> P2
    - info -> P3
 
-### 4.3 Task-to-Design-Brief Conversion
+### 5.3 Task-to-Design-Brief Conversion
 
 Tasks that require code changes re-enter the lifecycle at Stage 1:
 
-1. For auto-processible tasks (bounded, well-understood, safe to automate):
+1. For auto-processible tasks (bounded, well-understood, safe):
    - generate a minimal design brief automatically
-   - the brief must still pass Gate G2 (controller approval)
-   - proceed through the full stage chain
+   - the brief must still pass review (controller approval)
+   - proceed through the gate chain appropriate for the governance tier
 
 2. For controller-escalated tasks:
    - controller reviews the monitoring task
-   - controller decides: ignore, defer, or create design brief
-   - if design brief created, proceed through the full stage chain
+   - controller decides: ignore (with reason), defer, or create design brief
+   - if design brief created, proceed through the standard gate chain
 
 3. For incident-level findings (critical):
    - immediate bounded corrective action is allowed (hotfix path)
@@ -427,7 +550,7 @@ Tasks that require code changes re-enter the lifecycle at Stage 1:
      validation, and post-deployment verification
    - a full post-incident design review must follow within 24 hours
 
-### 4.4 Feedback Loop Rules
+### 5.4 Feedback Loop Rules
 
 1. No monitoring finding may directly modify production code without
    passing through at least an abbreviated stage chain.
@@ -441,418 +564,313 @@ Tasks that require code changes re-enter the lifecycle at Stage 1:
 4. Post-incident reviews must produce:
    - root cause analysis
    - corrective action taken
-   - preventive measures (design changes, test additions, monitoring improvements)
-   - updated monitoring rules if the issue class was previously undetected
+   - preventive measures
+   - at least one durable improvement (test, monitoring rule, checklist
+     update, design restriction, or runbook update)
 
-## 5. Stage Gate Summary
+## 6. Stage Gate Summary
+
+### 6.1 Minimum Gates by Governance Template
+
+| Template | G1 Design | G2 Review | G3 Implement | G4 Code Review | G5 Test | G6 Deploy | G7 Monitor |
+|----------|-----------|-----------|-------------|----------------|---------|-----------|------------|
+| T1       | Lite      | Self-check| Required    | Self-check     | Focused | Simple    | Basic      |
+| T2       | Standard  | Role-switch| Required   | Role-switch    | Standard| Staged    | Standard   |
+| T3       | Full      | Full      | Required    | Full           | Full    | Full chain| Full       |
+
+### 6.2 Gate Reference
 
 | Gate | Name                  | Key Requirement                           | Decision By  |
-|------|-----------------------|-------------------------------------------|--------------|
+|------|-----------------------|-------------------------------------------|--------------| 
 | G1   | Design Complete       | Brief with scope, constraints, criteria   | Controller   |
 | G2   | Design Approved       | Review passed, controller approved        | Controller   |
-| G3   | Implementation Done   | Result with validation, no placeholders   | Coding agent |
+| G3   | Implementation Done   | Result with validation, no placeholders   | Controller   |
 | G4   | Code Review Passed    | Review findings addressed, accepted       | Controller   |
 | G5   | Testing Passed        | Required test levels executed, no fails   | Controller   |
 | G6   | Production Deployed   | Staging + prod validation passed          | Controller   |
 | G7   | Monitoring Active     | Continuous; triggers loop on findings     | Automated    |
 
-## 6. Change Classification
+## 7. Change Classification
 
 ### Class A: Safe Local Change
 
 Examples: small bug fix, focused route extension, narrow test addition,
 documentation correction.
 
-Minimum gates: G1 (lightweight brief) + G3 + G4 + G5 (focused tests) + G6 (if runtime-affecting).
-
-Minimum validation: compile check, focused test, controller review, git archive.
-
 ### Class B: Runtime Behavior Change
 
 Examples: new runtime route, state machine change, API behavior change,
 controller decision boundary change.
-
-Minimum gates: All (G1 through G6).
-
-Minimum validation: focused tests, integration tests, controller review,
-milestone document, release note.
 
 ### Class C: Environment / Data / Schema / Memory Change
 
 Examples: database migration, memory contract change, production config change,
 knowledge base wiring, release process change.
 
-Minimum gates: All (G1 through G6) with enhanced requirements.
-
-Minimum validation: explicit rollback note, backup readiness, staging
-validation, migration check, controller acceptance.
-
 ### Class D: Self-Evolution or Auto-Modification Rule Change
 
 Examples: changing what the system may rewrite automatically, changing what
 agents may mutate directly, changing review bypass rules.
 
-Minimum gates: All (G1 through G6) with maximum scrutiny.
+## 8. Agent Operating Model
 
-Minimum validation: explicit controller review, explicit risk note, explicit
-rollback plan, no direct production landing, rollback drill.
+### 8.1 Single-Agent Mode (Default)
 
-## 7. Agent Role Boundaries
+The default operating model is a **single controller agent** that switches
+between roles as needed:
 
-### 7.1 Controller Agent
+1. **Designer**: analyze the problem, draft the design brief
+2. **Reviewer**: switch perspective, critique the design
+3. **Implementer**: write the bounded code change
+4. **Code Reviewer**: switch perspective, review the implementation
+5. **Tester**: validate the change
+6. **Operator**: deploy, monitor, handle feedback loop
 
-The controller agent is the main coordinator. It:
+Key discipline for single-agent role-switching:
 
-- creates and prioritizes design briefs
-- makes all gate decisions (approve/reject/defer)
-- does not write production code as its default mode
-- reviews all delegate outputs before acceptance
-- owns the promotion decision
-- manages the monitoring feedback triage
+- When switching to reviewer role, explicitly challenge the implementer's
+  assumptions. Do not rubber-stamp your own work.
+- When reviewing, ask: "If someone else wrote this, what would I question?"
+- Mark clearly when you are switching roles in your output.
+
+### 8.2 Multi-Agent Mode (Scale-Up Path)
+
+When multi-agent coordination becomes available, the controller can delegate
+to specialized agents:
+
+- **Architect Agent**: design analysis, option comparison
+- **Coding Agent**: bounded implementation
+- **Code Review Agent**: patch review, regression detection
+- **Test Fixer Agent**: test repair, validation
+- **Refactor Agent**: structural cleanup
+
+In multi-agent mode:
+
+- delegates recommend, only the controller decides
+- no delegate may accept its own output
+- no delegate may bypass the controller's gate decision
+- see `AGENT_ROLE_MATRIX.md` for full handoff protocols
+
+### 8.3 Role Boundaries (Both Modes)
 
 The controller may not:
-
 - delegate its own gate decision authority
-- auto-accept its own outputs
+- auto-accept its own outputs without explicit role-switching review
 - bypass stage gates
+- silently broaden scope
 
-### 7.2 Architect Agent
+## 9. Delivery Format Requirements
 
-The architect agent supports design analysis. It:
+### 9.1 Design Brief
 
-- compares implementation options
-- surfaces edge cases and risks
-- proposes minimal safe design adjustments
-- reviews design briefs for feasibility
+Required fields (adjust depth by tier):
 
-The architect agent may not:
+1. `problem_statement` (T1: goal)
+2. `proposed_approach` (T1: plan)
+3. `scope_boundary` (T1: non-goals)
+4. `affected_files` (T2+)
+5. `constraints` (T2+)
+6. `success_criteria` (T2+)
+7. `stop_conditions` (T2+)
+8. `change_class` (all tiers)
 
-- make final architecture decisions
-- approve its own designs
-- broaden scope beyond the analysis brief
+### 9.2 Implementation Result
 
-### 7.3 Coding Agent
-
-The coding agent implements bounded tasks. It:
-
-- reads the approved brief and context
-- makes the smallest safe patch
-- runs required validation
-- reports files changed and known risks
-
-The coding agent may not:
-
-- redesign architecture
-- broaden scope
-- add dependencies without approval
-- mix unrelated fixes into one patch
-
-### 7.4 Code Review Agent
-
-The code review agent reviews implementations. It:
-
-- checks for behavioral regressions
-- checks for scope creep
-- checks for missing validation
-- produces findings ordered by severity
-
-The code review agent may not:
-
-- rewrite the patch
-- make final acceptance decisions
-- broaden the review scope
-
-### 7.5 Test Fixer Agent
-
-The test fixer agent handles test maintenance. It:
-
-- repairs failing tests
-- adds tests for changed behavior
-- preserves test intent
-- explains root cause
-
-The test fixer agent may not:
-
-- weaken assertions to make tests pass
-- delete coverage without approval
-- change unrelated code paths
-
-### 7.6 Refactor Agent
-
-The refactor agent performs structural cleanup. It:
-
-- reduces duplication
-- improves readability
-- extracts helpers
-- keeps behavior unchanged
-
-The refactor agent may not:
-
-- combine refactors with strategy changes
-- silently alter runtime semantics
-- expand into broad rewrites
-
-## 8. Delivery Format Requirements
-
-### 8.1 Design Brief (Stage 1)
-
-Required fields:
-
-1. `problem_statement`
-2. `proposed_approach`
-3. `scope_boundary` (in-scope, out-of-scope)
-4. `affected_files`
-5. `constraints`
-6. `success_criteria`
-7. `stop_conditions`
-8. `change_class` (A / B / C / D)
-
-### 8.2 Design Review Result (Stage 2)
-
-Required fields:
-
-1. `findings` (ordered by severity)
-2. `open_questions`
-3. `risk_assessment`
-4. `recommendation` (approve / approve_with_changes / reject / blocked)
-
-### 8.3 Implementation Result (Stage 3)
-
-Required fields:
+Required fields (all tiers):
 
 1. `summary`
 2. `files_changed`
-3. `commit_hash`
-4. `validation_run`
-5. `known_risks`
-6. `recommendation` (accept / accept_with_changes / reject / blocked)
+3. `validation_run`
+4. `known_risks`
+5. `recommendation` (accept / accept_with_changes / reject / blocked)
 
-### 8.4 Code Review Result (Stage 4)
+### 9.3 Review Result
 
-Required fields:
+Required fields (T2+):
 
 1. `findings` (ordered by severity)
 2. `open_questions`
-3. `validation_gaps`
-4. `recommendation` (accept / accept_with_changes / reject)
+3. `recommendation` (approve / approve_with_changes / reject)
 
-### 8.5 Test Result (Stage 5)
+### 9.4 Test Result
 
-Required fields:
+Required fields (adjust depth by tier):
 
 1. `test_suite_result` (pass / fail with counts)
 2. `new_tests_added`
-3. `regression_surface_covered`
-4. `known_gaps`
-5. `recommendation` (pass / pass_with_gaps / fail)
+3. `known_gaps`
+4. `recommendation` (pass / pass_with_gaps / fail)
 
-### 8.6 Promotion Record (Stage 6)
-
-Required fields:
+### 9.5 Promotion Record (T2+)
 
 1. `scope_summary`
-2. `review_status`
-3. `validation_evidence`
-4. `git_checkpoint` (commit + tag)
-5. `rollback_pointer`
-6. `environment_target`
-7. `backup_status`
-8. `promotion_decision` (accept / accept_with_changes / reject / defer)
-9. `post_promotion_verification`
+2. `validation_evidence`
+3. `git_checkpoint`
+4. `rollback_pointer`
+5. `post_promotion_verification`
 
-### 8.7 Monitoring Task (Stage 7 -> Stage 1)
-
-Required fields:
-
-1. `source` (monitoring system identifier)
-2. `signal_level` (critical / warning / degraded / info)
-3. `evidence` (log entries, snapshots, metrics)
-4. `affected_surface`
-5. `auto_processible` (true / false)
-6. `priority` (P0 / P1 / P2 / P3)
-
-### 8.8 Blocked Report (Any Stage)
-
-When an agent cannot complete its task:
+### 9.6 Blocked Report (Any Stage)
 
 1. `blocker` (what prevents completion)
 2. `what_was_attempted`
 3. `what_is_missing`
 4. `recommendation` (escalate / defer / abort)
 
-## 9. Forbidden Shortcuts
+## 10. Forbidden Shortcuts
 
-The following are prohibited at all times:
-
-1. **Chat-only acceptance**: no change is accepted just because it was
-   discussed in conversation.
-
-2. **Delegate self-acceptance**: no agent may accept its own output as final.
-
-3. **Direct experimental patch to production**: all changes must go through
-   staging first.
-
-4. **Mixed promotion units**: unrelated fixes must not be bundled into one
-   promotion.
-
-5. **Self-evolution auto-promotion**: auto-modification proposals must go
-   through the full review chain.
-
-6. **Gate skipping**: no stage may be skipped for any change class.
-
+1. **Chat-only acceptance**: no change is accepted just because it was discussed.
+2. **Self-acceptance without role-switch**: review must use a different perspective.
+3. **Direct experimental patch to production**: T2/T3 must go through staging.
+4. **Mixed promotion units**: unrelated fixes must not be bundled.
+5. **Self-evolution auto-promotion**: auto-modification must go through full review.
+6. **Gate skipping**: no required gate may be skipped for the selected tier.
 7. **Silent scope broadening**: if scope expands, stop and report.
+8. **Validation-free acceptance**: missing validation = accept_with_changes or reject.
+9. **Undocumented hotfixes**: even emergency fixes must produce a result.
+10. **Rollback-free promotion**: if rollback is not possible, the change is not promotable.
 
-8. **Validation-free acceptance**: missing validation means
-   `accept_with_changes` or `reject`, never silent acceptance.
+## 11. Incident Response Protocol
 
-9. **Undocumented hotfixes**: even emergency fixes must produce an
-   implementation result and abbreviated review.
+### 11.1 Severity Levels
 
-10. **Rollback-free promotion**: if rollback is not possible, the change
-    is not promotable.
+| Severity | Definition                                          |
+|----------|-----------------------------------------------------|
+| SEV-1    | Production service completely down                  |
+| SEV-2    | Critical path broken but service partially running  |
+| SEV-3    | Degraded performance or quality regression          |
+| SEV-4    | Minor issue detected, no user impact                |
 
-## 10. Incident Response Protocol
+### 11.2 Response Requirements
 
-### 10.1 Severity Levels
+**SEV-1**: Immediate response, bounded hotfix or rollback allowed.
+Post-incident review required within 24 hours.
 
-| Severity | Definition                                          | Example                              |
-|----------|-----------------------------------------------------|--------------------------------------|
-| SEV-1    | Production service completely down                  | API health endpoint returns 5xx      |
-| SEV-2    | Critical path broken but service partially running  | Chat canary failing, UI probe broken |
-| SEV-3    | Degraded performance or quality regression          | Response time 3x above baseline      |
-| SEV-4    | Minor issue detected, no user impact                | Warning pattern in logs              |
+**SEV-2**: Response within 1 hour, abbreviated stage chain allowed.
+Post-incident review required within 48 hours.
 
-### 10.2 Response Requirements
+**SEV-3**: Response within 1 business day, standard lifecycle.
 
-**SEV-1: Immediate Response**
+**SEV-4**: Next planning cycle, may be deferred by controller.
 
-- Response time: immediate (within minutes)
-- Allowed action: bounded hotfix or rollback
-- Hotfix must still produce: implementation result, abbreviated review,
-  validation evidence
-- Post-incident review required within 24 hours
-- Full design review for permanent fix required within 72 hours
+### 11.3 Post-Incident Review
 
-**SEV-2: Urgent Response**
-
-- Response time: within 1 hour
-- Action: create P0 task, generate design brief
-- Abbreviated stage chain allowed (G1 lightweight + G3 + G4 abbreviated + G5 focused + G6)
-- Full post-incident review required within 48 hours
-
-**SEV-3: Scheduled Response**
-
-- Response time: within 1 business day
-- Action: create P1 task, full stage chain
-- Standard lifecycle applies
-
-**SEV-4: Tracked Response**
-
-- Response time: next planning cycle
-- Action: create P2/P3 task, full stage chain
-- May be deferred by controller
-
-### 10.3 Post-Incident Review
-
-Every SEV-1 and SEV-2 incident must produce a post-incident review containing:
+Every SEV-1 and SEV-2 must produce:
 
 1. `timeline`: what happened and when
 2. `root_cause`: why it happened
-3. `detection_method`: how monitoring detected it (or why it did not)
-4. `corrective_action`: what was done to fix it
+3. `detection_method`: how monitoring detected it
+4. `corrective_action`: what was done
 5. `preventive_measures`: what will prevent recurrence
-6. `monitoring_improvements`: new checks or thresholds to add
-7. `test_additions`: new tests to catch this class of failure
+6. `durable_improvement`: at least one of: new test, monitoring rule,
+   checklist update, design restriction, runbook update
 
-The post-incident review re-enters the lifecycle as a Class B or Class C
-change to implement the preventive measures.
+A runtime issue is not closed when the service works again. It is closed
+only when at least one durable anti-recurrence improvement is in place.
 
-## 11. Environment Separation
+## 12. Language Discipline
 
-Production quality requires environment separation. At minimum, the project
-must maintain:
+### 12.1 Banned Phrases
+
+The controller must reject vague completion language:
+
+- "should work"
+- "probably fixed"
+- "likely complete"
+- "theoretically safe"
+- "should pass tests"
+- "logically correct"
+
+### 12.2 Required Phrases
+
+Use explicit status language:
+
+- "implemented" (code is written)
+- "validated" (tests/checks have been run with evidence)
+- "unverified" (not yet checked)
+- "needs manual confirmation" (requires human action)
+- "remaining risk exists" (known gap)
+- "inferred" (based on reasoning, not evidence)
+- "unknown" (no information available)
+
+Anything not directly checked, run, or validated must be marked as
+`unknown`, `inferred`, `unverified`, or `pending confirmation`.
+
+## 13. AI-Specific Guardrails
+
+AI coding projects have failure modes that normal software checklists do not
+cover. See `AI_GUARDRAILS.md` for the complete set of AI-specific controls.
+
+Key rules summarized here:
+
+1. **No fake completion**: reject claims without evidence.
+2. **Separate inference from logic**: clarify what is deterministic code
+   vs model output vs prompt behavior vs tool results.
+3. **Memory/state changes are high risk**: always R3 unless justified.
+4. **Every loop needs exit behavior**: no endless retries or implicit hope.
+5. **Prompts are not control logic**: critical constraints must be
+   reinforced by code, validators, or state checks.
+6. **Incidents must become controls**: every issue produces at least one
+   durable improvement.
+
+## 14. Environment Separation
+
+Production quality requires environment separation. At minimum:
 
 1. **Development**: mutable, used for feature work and local debugging.
-2. **Sandbox/Evolution**: isolated, used for delegated agent experimentation
-   and self-evolution proposals. Cannot directly mutate production.
-3. **Staging**: release-candidate-only, used for pre-production validation.
-4. **Production**: stable, only reviewed and promoted behavior.
+2. **Staging** (T2+): release-candidate validation before production.
+3. **Production**: stable, only reviewed and promoted behavior.
+4. **Sandbox/Evolution** (T3): isolated experimentation environment.
 
-Separation must cover:
+T1 projects may operate with development + production only.
+T2 projects should have development + staging + production.
+T3 projects should have all four zones.
 
-- code workspace
-- process/port space
-- database
-- cache/queue
-- vector/knowledge store
-- runtime artifacts
-- configuration
+## 15. Rollback Discipline
 
-Direct sandbox-to-production promotion is prohibited.
+### 15.1 Recovery Layers
 
-## 12. Rollback Discipline
+1. **Code rollback**: git branch, commit, and tag discipline.
+2. **Config rollback**: configuration must be versioned.
+3. **Data/runtime rollback** (T3/Class C+): database backups, cache state,
+   runtime artifacts preserved for risky promotions.
 
-### 12.1 Recovery Layers
+### 15.2 Rollback Triggers
 
-Three recovery layers must be maintained:
-
-1. **Code rollback**: git branch, commit, and tag discipline. Every accepted
-   milestone has a recoverable pointer.
-
-2. **Config rollback**: configuration must be versioned. A release is not
-   recoverable if code can be rolled back but config cannot.
-
-3. **Data/runtime rollback**: database backups, cache state, vector store
-   snapshots, and runtime artifacts must be preserved for risky promotions.
-
-### 12.2 Rollback Triggers
-
-Rollback should be considered immediately when:
+Rollback should be considered when:
 
 - canonical runtime path fails after promotion
 - truth surfaces become ambiguous
 - memory or knowledge is unexpectedly polluted
 - service launch path no longer matches reviewed baseline
-- self-evolution changes controller behavior without approval
 
-### 12.3 Rollback Execution
+### 15.3 Minimum Rollback by Tier
 
-Rollback is a bounded packet:
+- T1: keep old version, know how to restore it
+- T2: git checkpoint + config versioning + explicit rollback method
+- T3: full three-layer recovery (code + config + data)
 
-1. identify target rollback version
-2. restore code
-3. restore config
-4. restore data if needed
-5. validate canonical service path
-6. archive rollback result
+## 16. Milestone and Archive Discipline
 
-## 13. Milestone and Archive Discipline
-
-### 13.1 Checkpoint vs Milestone vs Archive Point
-
-- **Checkpoint**: safety snapshot of work in progress. Not for formal
-  acceptance.
+- **Checkpoint**: safety snapshot of work in progress.
 - **Milestone**: bounded result with validation, review, and evidence.
-  Eligible for formal acceptance and tagging.
-- **Archive point**: milestone or larger boundary that should remain easy
-  to recover, replay, or compare later.
+- **Archive point**: milestone that should remain easy to recover.
 
-### 13.2 Milestone Criteria
-
-A result qualifies as a milestone when:
+Milestone criteria:
 
 1. scope is bounded and named
-2. result has a clear claim boundary
-3. validation was run
-4. result can be reviewed externally
-5. review outcome is accepted or absorbed with explicit changes
-6. result is committed to git
-7. result can be traced through docs, tests, and handoff
+2. validation was run
+3. result can be reviewed
+4. result is committed to git
+5. for T2+: result is tagged
 
-### 13.3 Archive Rules
+## 17. Companion Documents
 
-- every meaningful milestone must be committed
-- every accepted milestone should be tagged
-- every review result worth keeping must be written and committed
-- every high-risk operation must have a rollback pointer
-- every promotion must be tied to a known code + config state
+| Document                        | Purpose                                              |
+|---------------------------------|------------------------------------------------------|
+| `STAGE_GATES_REFERENCE.md`      | Quick-reference card for all 7 gates                 |
+| `MONITORING_FEEDBACK_LOOP.md`   | Closed-loop specification                            |
+| `AGENT_ROLE_MATRIX.md`          | Multi-agent role mapping (scale-up reference)        |
+| `AI_GUARDRAILS.md`              | AI-specific controls and guardrails                  |
+| `CHECKLISTS.md`                 | Stage-by-stage checklists per governance tier        |
+| `TEMPLATES.md`                  | Fill-in-the-blank task, design, incident templates   |
+| `RUNBOOKS.md`                   | Step-by-step release, rollback, incident runbooks    |
