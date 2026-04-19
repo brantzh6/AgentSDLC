@@ -84,10 +84,11 @@ AgentSDLC/
 │
 ├── instantiation/                  ← how to adopt
 │   ├── GUIDE.md                    ← step-by-step setup process
-│   └── PROJECT_PROFILE.md          ← per-project template to fill
+│   ├── PROJECT_PROFILE.md          ← per-project template to fill
+│   └── samples/                    ← project-level samples
+│       └── model-routing-policy-pack/ ← sample: task→model routing rules
 │
-└── reference/                      ← samples and cross-references
-    ├── model-routing-policy-pack/  ← sample: task→model routing rules
+└── reference/                      ← process history (not production files)
 ```
 
 ---
@@ -124,12 +125,12 @@ AgentSDLC/
 |----------|-------------|
 | [`instantiation/GUIDE.md`](instantiation/GUIDE.md) | Step-by-step process: classify → fill profile → adopt prompt → verify. |
 | [`instantiation/PROJECT_PROFILE.md`](instantiation/PROJECT_PROFILE.md) | Template: environment matrix, connectors, health endpoints, validation commands, rollback assets. |
+| [`instantiation/samples/model-routing-policy-pack/`](instantiation/samples/model-routing-policy-pack/) | **Sample:** Project-level task→model routing rules with escalation criteria. |
 
-### Reference (samples)
+### Reference (process history)
 
-| Document | What It Does |
-|----------|-------------|
-| [`reference/model-routing-policy-pack/`](reference/model-routing-policy-pack/) | **Sample:** Project-level task→model routing rules. Shows how to map task types to specific models with escalation criteria. |
+Process records and cross-analysis materials. Not production files.
+Archived locally, not tracked in git.
 
 ---
 

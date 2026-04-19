@@ -269,4 +269,4 @@ From any promotion record, you can trace back to the original design brief.
 - `operations/CHECKLISTS.md` — per-stage checklists
 - `operations/TEMPLATES.md` — delivery templates
 - `operations/RUNBOOKS.md` — operational runbooks
-- `reference/model-routing-policy-pack/` — sample: task→model routing rules
+- `instantiation/samples/model-routing-policy-pack/` — sample: task→model routing rules

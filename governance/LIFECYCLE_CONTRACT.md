@@ -1027,4 +1027,4 @@ Milestone criteria:
 | `agents.md`                     | Drop-in agent operating prompt for any project       |
 | `instantiation/PROJECT_PROFILE.md`            | Per-project instantiation template                   |
 | `instantiation/GUIDE.md`        | How to apply this framework to a real project        |
-| `reference/model-routing-policy-pack/` | Sample: project-level task→model routing rules  |
+| `instantiation/samples/model-routing-policy-pack/` | Sample: project-level task→model routing rules  |
