@@ -70,6 +70,21 @@ Before promoting, confirm:
 5. **Open** an incident record (use the Incident Closure template).
 6. **Do not re-release** until the issue is understood sufficiently.
 
+### Scenario-Specific Rollback Procedures
+
+| Scenario | Rollback Steps |
+|----------|---------------|
+| Code-only change | `git checkout` or `git revert` to tagged version, redeploy |
+| Config change | Restore config from env backup, restart service |
+| Database migration | Run reverse migration (e.g., `alembic downgrade -1`), verify data integrity |
+| Mixed (code + migration) | Reverse migration FIRST, then rollback code, verify both |
+| State/memory change (Class C+) | Restore from backup, verify state consistency, clear caches |
+
+For all scenarios:
+- Verify the rolled-back state by running the canonical health check
+- Confirm the main path works after rollback
+- Do not re-release until the root cause is understood
+
 ### After Rollback
 
 1. Document what triggered the rollback.

@@ -131,7 +131,18 @@ Class D changes:
   controller prepares a sign-off draft, but the final approval must come
   from a human. Without human sign-off, the change stays in sandbox/staging.
 
-### Rule 9: Environment Boundaries for Agent Projects
+### Rule 9: Test Level Compliance
+
+Agents must not claim validation is complete when only function-level (L1)
+tests were run for T2+ changes. This is a guardrail violation equivalent
+to claiming completion without evidence.
+
+- For T2+, the test result must demonstrate L1 + L2 + at least one L3 path.
+- Reporting only L1 coverage for a T2+ change is treated as incomplete
+  validation and must be rejected or sent back for additional testing.
+- The controller must verify test level coverage before passing G5.
+
+### Rule 10: Environment Boundaries for Agent Projects
 
 Agent, memory, and orchestration projects (Type C) must respect environment
 boundaries. Many dangerous failures in these systems are not code bugs but

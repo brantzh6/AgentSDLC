@@ -153,8 +153,21 @@ base tier. See `governance/LIFECYCLE_CONTRACT.md` Section 3.4.
 | Field           | T1                   | T2                      | T3                     |
 |-----------------|----------------------|-------------------------|------------------------|
 | Test scope      | Focused check        | Standard suite          | Full suite + integration|
+| Min test levels | L1                   | L1 + L2 + ≥1 L3 path  | L1 + L2 + full L3 + L4|
 | Pass condition  | Main path + 1 failure| No regressions + focused| All levels for class   |
 | Decision by     | Controller           | Controller              | Controller             |
+
+**Exit criteria**: Controller must verify that the test result artifact includes
+evidence at every required test level before passing G5. For T2+, a test result
+showing only L1 (unit) coverage is grounds for rejection.
+
+### Minimum Test Levels by Tier
+
+| Tier | Required Levels | Gate Rule |
+|------|----------------|-----------|
+| T1/G-Lite | L1 | Function-level check is sufficient |
+| T2/G-Std | L1 + L2 + at least 1 L3 path | Unit-only is explicitly insufficient |
+| T3/G-Full | L1 + L2 + full L3 + L4 | Full coverage including E2E and acceptance |
 
 ### Required Test Levels by Change Class (T2/T3)
 

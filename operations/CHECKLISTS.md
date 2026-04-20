@@ -126,12 +126,17 @@ All T1 items plus:
 - [ ] Were focused tests added for changed behavior?
 - [ ] Was at least 1 regression path checked?
 - [ ] Were high-risk parts tested or explicitly acknowledged?
+- [ ] Was at least one integration test exercised (L2)?
+- [ ] Was at least one canonical E2E path verified (L3)?
+- [ ] Does the test result report which levels (L1/L2/L3/L4) were covered?
 
 ### T3 (Full Testing)
 
 All T2 items plus:
 - [ ] Were integration tests run?
 - [ ] Were smoke tests run against live-like environment?
+- [ ] Was full E2E test suite passed (L3)?
+- [ ] Were acceptance criteria from design brief verified (L4)?
 - [ ] Was migration validation done (if applicable)?
 - [ ] Was rollback feasibility checked (Class C+)?
 - [ ] Was rollback drill done (Class D)?

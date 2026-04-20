@@ -199,6 +199,20 @@ For full lifecycle context, see `governance/LIFECYCLE_CONTRACT.md`.
 - Change ID:
 - Parent Artifact: <link to review result>
 
+### Test Levels Covered
+- [ ] L1: Unit — single function/module
+- [ ] L2: Integration — cross-module, API contracts, DB
+- [ ] L3: System/E2E — canonical user path end-to-end
+- [ ] L4: Acceptance — design intent satisfied
+
+### Canonical E2E Path Tested (L3)
+- Path description:
+- Evidence (command/output/screenshot):
+
+### Missing Levels
+- Level(s) not covered:
+- Reason:
+
 ### Test Suite
 - pass / fail
 - total: _ | passed: _ | failed: _ | skipped: _
@@ -255,6 +269,10 @@ For quick validation notes (T1/T2):
 ### Build / Version
 -
 
+### Release Tag
+- Current: release/{YYYY-MM-DD}-{seq}
+- Previous: release/{previous tag}
+
 ### Promoted From
 - (e.g., staging)
 
@@ -278,6 +296,15 @@ For quick validation notes (T1/T2):
 
 ### Rollback Pointer
 -
+
+### Rollback Commands
+- (specific commands to execute, not just "git revert")
+- e.g., git checkout release/{tag}, alembic downgrade -1, docker compose up -d
+
+### Rollback Verified
+- [ ] Yes — verified in staging
+- [ ] Not applicable (T1/T2 non-mandatory)
+- [ ] No — reason:
 
 ### Backup Status
 -

@@ -185,6 +185,27 @@ Class-aware: A=focused, B=focused+smoke, C=B+migration/rollback, D=C+authority r
 For Type C systems: expected context, missing context, tool success, tool
 failure, bad input, exit/degradation paths.
 
+### Test level reporting requirement
+
+Delegates must report which test levels they covered (L1/L2/L3/L4) in every
+test result. The test levels are:
+
+| Level | Scope |
+|-------|-------|
+| L1: Unit | Single function/module |
+| L2: Integration | Cross-module, API contracts, DB |
+| L3: System/E2E | Full canonical user path end-to-end |
+| L4: Acceptance | Design intent satisfied |
+
+**Hard rule**: Function-level checks (L1) are necessary but never sufficient
+for T2+ tasks. If a delegate only provides L1 evidence, the controller must
+reject or require additional testing before passing G5.
+
+For T2+, the test result must include:
+- which levels were covered
+- which canonical E2E path was tested (L3)
+- which levels were NOT covered and why
+
 ---
 
 ## 7. Release rules

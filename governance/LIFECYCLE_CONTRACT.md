@@ -1,7 +1,7 @@
 # AI Coding Lifecycle Governance Contract
 
-Status: v3.1
-Version: 3.1
+Status: v3.2
+Version: 3.2
 
 ## 1. Purpose and Scope
 
@@ -405,6 +405,29 @@ Responsible role: controller (reviewer perspective)
 
 Purpose: Verify the change works correctly and does not regress existing
 behavior.
+
+#### 5.1 Test Level Hierarchy
+
+Every test activity must be classified by the level of verification it provides:
+
+| Level | Scope | What It Proves |
+|-------|-------|----------------|
+| L1: Unit | Single function/module | Logic correctness in isolation |
+| L2: Integration | Cross-module, API contracts, DB interaction | Components work together |
+| L3: System/E2E | Full canonical user path end-to-end | The feature works from user perspective |
+| L4: Acceptance | Design intent satisfied | The change does what the brief asked for |
+
+#### 5.2 Minimum Test Level by Tier (Hard Rule)
+
+| Tier | Required Levels | Hard Rule |
+|------|----------------|-----------|
+| T1/G-Lite | L1 (focused unit) | Function-level check is sufficient |
+| T2/G-Std | L1 + L2 + at least 1 L3 path | Unit-only is explicitly insufficient |
+| T3/G-Full | L1 + L2 + full L3 + L4 | Full coverage including E2E and acceptance |
+
+**Non-negotiable rule**: For T2+ tasks, function-level (L1) validation alone
+is never sufficient. At least one integration-level (L2) test and one
+canonical end-to-end path (L3) must be verified with evidence.
 
 #### T1 Focused Check
 
@@ -977,14 +1000,33 @@ scale with project level and governance tier.
 
 ## 15. Rollback Discipline
 
-### 15.1 Recovery Layers
+### 15.1 Version Discipline
+
+Every promotable change must be version-tagged for traceability and rollback.
+
+1. **Tagging convention**: `release/{YYYY-MM-DD}-{seq}`
+   (e.g., `release/2026-04-19-001`). Every T2+ promotion must create a git tag.
+
+2. **Pre-promotion checkpoint**: Tag the current known-good state BEFORE
+   promoting, so rollback always has a known-good tag to return to.
+
+3. **Environment version tracking**: The promotion record must include
+   `current_version` (the new tag) and `previous_version` (the tag to
+   roll back to).
+
+4. **Rollback pointer format**: Standardize as `git:release/{tag}` plus
+   a list of rollback commands (e.g., `alembic downgrade -1` for migrations,
+   `docker compose up -d` for service restarts). The pointer must be
+   specific enough for an operator to execute without guessing.
+
+### 15.2 Recovery Layers
 
 1. **Code rollback**: git branch, commit, and tag discipline.
 2. **Config rollback**: configuration must be versioned.
 3. **Data/runtime rollback** (T3/Class C+): database backups, cache state,
    runtime artifacts preserved for risky promotions.
 
-### 15.2 Rollback Triggers
+### 15.3 Rollback Triggers
 
 Rollback should be considered when:
 
@@ -993,11 +1035,26 @@ Rollback should be considered when:
 - memory or knowledge is unexpectedly polluted
 - service launch path no longer matches reviewed baseline
 
-### 15.3 Minimum Rollback by Tier
+### 15.4 Minimum Rollback by Tier
 
 - T1: keep old version, know how to restore it
 - T2: git checkpoint + config versioning + explicit rollback method
 - T3: full three-layer recovery (code + config + data)
+
+### 15.5 Rollback Verification
+
+Rollback must not only be documented — for high-risk changes it must be
+**verified** before promotion.
+
+- **T3 and Class C+ changes**: Rollback must be VERIFIED (not just documented)
+  before promotion. This means either:
+  (a) executing the rollback in staging and confirming recovery, or
+  (b) demonstrating a dry-run rollback that proves the path works.
+
+- **T2 changes**: Rollback path must be documented with specific commands.
+  Verification is recommended but not mandatory.
+
+- **T1 changes**: Rollback path must be known. No formal verification required.
 
 ## 16. Milestone and Archive Discipline
 
