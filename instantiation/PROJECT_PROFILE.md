@@ -34,11 +34,31 @@
 > L2 projects: dev + staging + production minimum.
 > L3 / Class D projects: dev + sandbox + staging + production required.
 
+### Environment Version Map **[recommended for T2+]**
+
+Track which release tag is currently deployed to each environment.
+Update this table after every promotion to keep environment state auditable.
+
+| Environment | Current Release Tag              | Previous Release Tag             | Last Promoted |
+|-------------|----------------------------------|----------------------------------|---------------|
+| dev         | _e.g., `release/2026-04-20-002`_ | _e.g., `release/2026-04-20-001`_ | _date_        |
+| staging     | _e.g., `release/2026-04-19-003`_ | _e.g., `release/2026-04-19-002`_ | _date_        |
+| production  | _e.g., `release/2026-04-18-001`_ | _e.g., `release/2026-04-17-002`_ | _date_        |
+
+> This table enables environment-level auditing: at any point you can tell
+> what version each environment is running and what to roll back to.
+
 ---
 
-## 3. Canonical User Paths **[recommended]**
+## 3. Canonical E2E Paths **[required for T2+]**
 
 List the critical user-facing paths that define "the system is working."
+These paths serve dual duty:
+- **Monitoring**: health checks verify these paths to detect regressions
+- **L3 Testing**: every T2+ test result must verify at least one of these
+  paths end-to-end (see `governance/LIFECYCLE_CONTRACT.md` Section 5.2).
+  Pre-defining them here prevents different agents from picking arbitrary
+  L3 paths while missing the actual critical user journeys.
 
 | Path Name            | Description                                | Health Indicator       |
 |----------------------|--------------------------------------------|------------------------|
