@@ -19,10 +19,10 @@ This document defines the seven stage gates for IEF v0. It adapts the AgentSDLC 
 |------|-------------|-------------------|---------------------------|
 | G1 Scope Gate | Lite — issue + criteria | Standard — issue + criteria + classification | Standard — issue + criteria + classification |
 | G2 Boundary Gate | Lite — profile check | Standard — profile + cross-repo boundary | Standard — profile + cross-repo boundary + runtime boundary |
-| G3 Contract Gate | N/A / skip | Required — design + I/O + schema | Required — design + I/O + schema (contract must precede code) |
-| G4 Evidence Gate | Lite — PR + no broken links | Standard — PR + schema + cross-review evidence | Standard — PR + test/dry-run + rollback plan |
-| G5 Review Gate | Lite — one reviewer check | Standard — cross-review + Program/human approval | Standard — reviewer + Program/human for high-risk |
-| G6 Merge Gate | Lite — checklist + merge | Standard — checklist + approval + rollback known | Standard — checklist + approval + rollback verified |
+| G3 Contract Gate | Null-form pass — confirm no contract, schema, interface, lifecycle, or gate is changed | Required — design + I/O + schema | Required — reference approved contract; mandatory I/O + schema only if adding/modifying contract |
+| G4 Evidence Gate | Lite — PR + no broken links | Standard — PR + schema + cross-review evidence | Standard — PR + multi-level test evidence + rollback plan |
+| G5 Review Gate | Lite — one reviewer check | Standard — cross-review + Program/human approval | Standard — reviewer + Program/human for high-risk; human sign-off mandatory for Section 6 categories |
+| G6 Merge Gate | Lite — checklist + merge | Standard — checklist + approval + rollback known | Standard — checklist + approval + rollback verified; human sign-off for Section 6, Program/human for other high-risk |
 | G7 Learning Gate | Lite — spot-check | Standard — observation + issue closure rules | Standard — observation + regression watch + durable improvement |
 
 ## Mapping to AgentSDLC Gates
@@ -114,16 +114,22 @@ This document defines the seven stage gates for IEF v0. It adapts the AgentSDLC 
 
 **Pass Criteria:**
 - Contract definition is complete, reviewable, and free of placeholders.
-- For Implementation-Controlled changes: the referenced contract has already passed G3 in a prior Contract-Critical PR, or the contract is defined inline with equivalent rigor.
+- For Implementation-Controlled changes:
+  - The referenced contract has already passed G3 in a prior Contract-Critical PR, **or**
+  - The contract is defined inline with equivalent rigor.
+  - If the Implementation-Controlled PR **adds or modifies** a contract, explicit I/O, schema, and validation rule are **mandatory** (same bar as Contract-Critical).
+  - If the Implementation-Controlled PR **only implements** an existing contract, a contract reference is sufficient; schema redefinition is not required.
+- For Design-Lite changes: the null-form pass is confirmed — the PR does not introduce, modify, or remove any contract, schema, interface, lifecycle definition, or gate.
 
 **Failure Handling:**
 - Return to design. Do not approve a Contract-Critical PR that lacks explicit I/O or boundary.
 - Do not approve an Implementation-Controlled PR that implements an undefined or unreviewed contract.
+- Do not approve a Design-Lite PR that smuggles contract changes; reclassify to Contract-Critical.
 
 **Applicable Profile:**
 - **Contract-Critical:** Required.
-- **Implementation-Controlled:** Required (contract must be defined or referenced).
-- **Design-Lite:** Not applicable; G3 is passed in null form.
+- **Implementation-Controlled:** Required (contract must be defined or referenced; mandatory I/O+schema only if new/modified contract).
+- **Design-Lite:** Not skipped. Passed in **null form** — the gate is satisfied by confirming the PR has no contract impact.
 
 ---
 
@@ -139,13 +145,18 @@ This document defines the seven stage gates for IEF v0. It adapts the AgentSDLC 
 - [ ] Linked issue is referenced in the PR description
 - [ ] For **Design-Lite:** PR is opened and reviewer can inspect; no broken links or obvious errors
 - [ ] For **Contract-Critical:** design reference, explicit I/O, boundary statement, schema/example, and cross-review evidence are present
-- [ ] For **Implementation-Controlled:** design reference, test or dry-run evidence, and rollback plan are present
+- [ ] For **Implementation-Controlled:**
+  - [ ] Design reference (or inline contract if new/modified)
+  - [ ] Multi-level test evidence (L1 + L2 minimum; L3 for high-risk / cross-repo / stateful / memory / scheduler / permission changes)
+  - [ ] Dry-run evidence, if present, is explicitly marked as **supplemental** and does not substitute for required test levels
+  - [ ] Rollback plan is documented with specific commands or steps
 - [ ] No placeholder sections (e.g., "TODO: add test") remain
 - [ ] Evidence is verifiable (links work, commands are reproducible, outputs are shown)
 
 **Pass Criteria:**
 - Evidence is complete for the selected profile.
 - Reviewer can independently verify the evidence without guessing.
+- For Implementation-Controlled: dry-run alone is **not sufficient**. If L3 is claimed not applicable, the PR contains explicit justification accepted by the reviewer or Program Agent.
 
 **Failure Handling:**
 - Request evidence from the author.
@@ -167,14 +178,16 @@ This document defines the seven stage gates for IEF v0. It adapts the AgentSDLC 
 **Checklist:**
 - [ ] For **Design-Lite:** one reviewer has performed an explicit check and confirmed no hidden contract changes
 - [ ] For **Contract-Critical:** cross-review from at least one other repo perspective is completed; findings are addressed
-- [ ] For **Implementation-Controlled:** reviewer approval is recorded; high-risk changes have Program Agent or human approval
+- [ ] For **Implementation-Controlled:**
+  - [ ] Reviewer approval is recorded
+  - [ ] For high-risk changes: Program Agent or human approval is recorded
+  - [ ] For changes falling under `docs/BOOTSTRAP_GOVERNANCE_PROFILE.md` **Section 6 (Human Sign-off Rules)**: **human owner sign-off is recorded** and cannot be substituted by Program Agent approval alone
 - [ ] Review result is explicit (approve / conditional approve / reject)
 - [ ] No unresolved blockers remain
-- [ ] Human sign-off is recorded if required per `docs/BOOTSTRAP_GOVERNANCE_PROFILE.md` Section 6
 
 **Pass Criteria:**
 - Review is complete with explicit approval.
-- All required approvals (reviewer, cross-reviewer, Program/human) are recorded.
+- All required approvals (reviewer, cross-reviewer, Program/human, human owner for Section 6) are recorded.
 
 **Failure Handling:**
 - Address findings and re-submit for review.
@@ -198,7 +211,8 @@ This document defines the seven stage gates for IEF v0. It adapts the AgentSDLC 
 - [ ] No direct push to `main`; delivery is via PR only
 - [ ] For **Contract-Critical replacing existing contract:** rollback plan is documented and accessible
 - [ ] For **Implementation-Controlled:** rollback plan is documented with specific commands or steps
-- [ ] For high-risk changes: human sign-off is recorded
+- [ ] For changes falling under `docs/BOOTSTRAP_GOVERNANCE_PROFILE.md` **Section 6**: **human owner sign-off is recorded** (Program Agent approval does not substitute)
+- [ ] For other high-risk changes: Program Agent or human approval is recorded
 - [ ] No regression in existing capabilities (existing tests pass, or explicit justification is provided)
 - [ ] PR title and description are accurate and link the issue (`Closes #N`)
 
@@ -260,7 +274,7 @@ G2 Boundary Gate — correct profile? layer boundaries respected?
   v
 G3 Contract Gate — contract defined (if Contract-Critical / Implementation-Controlled)?
   | NO -> Return to design
-  | YES / N/A for Design-Lite
+  | YES / null-form pass for Design-Lite
   v
 G4 Evidence Gate — evidence complete for profile?
   | NO -> Add evidence
@@ -307,3 +321,4 @@ G7 Learning Gate — stable? lessons captured?
 |---|---|---|
 | 2026-04-28 | Initial v0 gate profile defined | Contract-Critical |
 | 2026-04-28 | Aligned with Protocol#2: added AgentCard and field-level boundary note | Contract-Critical |
+| 2026-04-28 | Fixed Codex review findings: null-form pass for Design-Lite G3, tightened IC test requirements, reconciled contract evidence, aligned approval authority | Contract-Critical |
