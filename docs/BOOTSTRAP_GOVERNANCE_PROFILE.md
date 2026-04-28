@@ -31,7 +31,7 @@ This document defines the three bootstrap governance profiles used during IEF v0
 |---|---|---|
 | **Design-Lite** | README updates, doc stubs, non-normative comments, structural reorganization that does not change runtime behavior | One reviewer check |
 | **Contract-Critical** | Protocol objects, task lifecycle definitions, runner interfaces, adapter contracts, knowledge context formats, governance profiles, and any change that downstream repos depend on | Cross-review + Program Agent or human sign-off |
-| **Implementation-Controlled** | Code, scripts, validators, runner logic, GitHub automation, adapter code, and any change that affects runtime behavior | Review before merge; Program Agent or human approval for high-risk changes |
+| **Implementation-Controlled** | Code, scripts, validators, runner logic, GitHub automation, adapter code, and any change that affects runtime behavior | Review before merge; Program Agent or human approval for high-risk changes; Section 6 human sign-off mandatory when applicable |
 
 ---
 
@@ -177,14 +177,45 @@ Escalate to **Implementation-Controlled** when:
 - [ ] Linked issue exists
 - [ ] Design reference (RFC, ADR, or contract doc)
 - [ ] Pull request is opened
-- [ ] Test or dry-run evidence attached to PR
+- [ ] Multi-level test evidence attached to PR (see Test Level Requirements below)
 - [ ] Rollback plan documented
 - [ ] Review before merge
 - [ ] No regression in existing capabilities
 
+#### Test Level Requirements for Implementation-Controlled
+
+Implementation-Controlled changes affect runtime behavior and must provide evidence at the following test levels, aligned with `governance/STAGE_GATES.md`:
+
+| Risk Level | Minimum Test Levels | L3 Required |
+|---|---|---|
+| Standard (most runtime changes) | L1 + L2 | Recommended |
+| High-risk / cross-repo / stateful / memory / scheduler / permission | L1 + L2 + at least one L3 path | Required |
+
+**Test level definitions:**
+- **L1 — Unit / local validation:** Single function or module verified in isolation.
+- **L2 — Integration validation:** Cross-module, API contract, or component interaction verified.
+- **L3 — End-to-end / system / canonical workflow:** Full user or system path verified end-to-end.
+
+**Dry-run policy:**
+- Dry-run evidence is permitted only as **supplemental** evidence.
+- Dry-run alone is **not sufficient** to satisfy the test requirement for Implementation-Controlled changes.
+- A dry-run may supplement L2 or L3 when a full live environment is unavailable, but the reviewer must confirm the dry-run faithfully represents the real execution path.
+
+**L3 exemption:**
+- If L3 is not applicable to the change, the author must state the reason explicitly in the PR.
+- The reviewer or Program Agent must accept the exemption before G4 can pass.
+- Exemptions are not allowed for high-risk, cross-repo, stateful, memory, scheduler, or permission changes.
+
+#### Contract Evidence Rules for Implementation-Controlled
+
+- **Default:** An Implementation-Controlled PR must **reference an approved contract or design document**. It does not need to redefine the schema.
+- **If the PR adds or modifies a contract:** Explicit input/output, boundary statement, schema/example, and validation rule become **mandatory** (equivalent to Contract-Critical evidence requirements).
+- **If the PR only implements an existing contract:** Test evidence and contract reference are sufficient. Schema redefinition is not required.
+
 ### Review Requirements
 - Review before merge by at least one reviewer.
-- For high-risk changes (touching memory, state, scheduler, core loop, permissions, or cross-repo connectors), Program Agent or human approval is required.
+- For high-risk changes, Program Agent or human approval is required.
+- If the change falls under **Section 6 (Human Sign-off Rules)**, **human owner sign-off is mandatory** and cannot be substituted by Program Agent approval alone.
 - Review must confirm the implementation matches the referenced contract and does not silently broaden scope.
 
 ### Human Sign-off Required
@@ -197,14 +228,16 @@ Escalate to **Implementation-Controlled** when:
 ### Program Agent Sign-off Required
 - For high-risk changes as defined above.
 - Optional but recommended for standard Implementation-Controlled changes.
+- **Cannot substitute for Section 6 human sign-off when Section 6 applies.**
 
 ### Pre-Merge Checklist
 - [ ] Issue is linked in PR description
 - [ ] Design reference is cited
-- [ ] PR includes test or dry-run evidence
+- [ ] PR includes multi-level test evidence (L1+L2 minimum; L3 for high-risk)
 - [ ] Rollback plan is documented with specific commands or steps
 - [ ] Reviewer approved
 - [ ] Program Agent or human approval recorded for high-risk changes
+- [ ] Human sign-off recorded if Section 6 applies
 - [ ] No regression in existing capabilities (existing tests pass or explicit justification provided)
 - [ ] Contract definitions are not mixed into implementation code without separate Contract-Critical review
 
@@ -228,16 +261,20 @@ Escalate to **Implementation-Controlled** when:
 | Linked issue | Required | Required | Required |
 | Acceptance criteria in issue | Required | Required | Required |
 | Design doc / RFC reference | — | Required | Required |
-| Explicit input/output contract | — | Required | Recommended |
-| Explicit boundary statement | — | Required | Recommended |
-| Schema / example / validation rule | — | Required | Recommended |
+| Explicit input/output contract | — | Required | Required only if adding/modifying contract; otherwise reference existing contract |
+| Explicit boundary statement | — | Required | Required only if adding/modifying contract; otherwise reference existing contract |
+| Schema / example / validation rule | — | Required | Required only if adding/modifying contract; otherwise reference existing contract |
 | Cross-review from other repo | — | Required | Recommended |
 | PR opened | Required | Required | Required |
-| Test or dry-run evidence | — | Recommended | Required |
+| Multi-level test evidence (L1+L2 min; L3 for high-risk) | — | Recommended | Required |
+| Dry-run (supplemental only) | — | Allowed | Allowed |
 | Rollback plan | — | Required if replacing contract | Required |
 | Reviewer check | Required | Required | Required |
 | Program/human approval before merge | — | Required | Required for high-risk |
+| Human sign-off (Section 6 categories) | — | Required if applicable | Required if applicable |
 | No regression check | — | Recommended | Required |
+
+**Note on contract evidence for Implementation-Controlled:** If an Implementation-Controlled PR introduces a new contract or modifies an existing one, the evidence bar rises to Contract-Critical for the contract portion. The PR should either (a) split the contract change into a separate Contract-Critical PR, or (b) provide full contract evidence inline and accept the higher review bar.
 
 ---
 
@@ -247,9 +284,11 @@ Escalate to **Implementation-Controlled** when:
 |---|---|---|
 | Design-Lite | One reviewer check | Reviewer |
 | Contract-Critical | Cross-review (different repo or capability perspective) + Program Agent or human approval | Program Agent or human |
-| Implementation-Controlled | Reviewer approval; high-risk changes need Program Agent or human approval | Reviewer (standard); Program Agent or human (high-risk) |
+| Implementation-Controlled | Reviewer approval; high-risk changes need Program Agent or human approval; Section 6 categories need human sign-off | Reviewer (standard); Program Agent or human (high-risk); **Human owner (Section 6)** |
 
 **Cross-review definition:** A reviewer who is not the author and who represents a different IEF layer or repository perspective. For example, an IEF-Protocol change should be reviewed from an IEF-Operations or IEF-Runners perspective.
+
+**Important:** Program Agent approval never substitutes for human sign-off required by Section 6. When Section 6 applies, both Program Agent and human sign-off may be required, but human sign-off is the non-negotiable minimum.
 
 ---
 
@@ -270,6 +309,8 @@ Human owner sign-off is **required** before merge for the following categories, 
 - Why the change is justified
 - What the rollback path is
 - What monitoring will verify safety
+
+**Relation to Program Agent approval:** Program Agent approval is a separate gate. When Section 6 applies, Program Agent approval may coexist with human sign-off, but it **cannot replace it**.
 
 ---
 
@@ -360,3 +401,4 @@ Any PR that drifts into another layer's responsibility must be split or re-scope
 |---|---|---|
 | 2026-04-28 | Initial bootstrap profiles defined | Contract-Critical |
 | 2026-04-28 | Aligned with Protocol#2: added AgentCard, field-level boundary note | Contract-Critical |
+| 2026-04-28 | Fixed Codex review findings: tightened IC test requirements, reconciled G3 contract evidence, clarified approval authority | Contract-Critical |
