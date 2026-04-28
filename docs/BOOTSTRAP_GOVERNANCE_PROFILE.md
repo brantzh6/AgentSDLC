@@ -188,8 +188,8 @@ Implementation-Controlled changes affect runtime behavior and must provide evide
 
 | Risk Level | Minimum Test Levels | L3 Required |
 |---|---|---|
-| Standard (most runtime changes) | L1 + L2 | Recommended |
-| High-risk / cross-repo / stateful / memory / scheduler / permission | L1 + L2 + at least one L3 path | Required |
+| Standard runtime-impacting changes / T2 / G-Std | L1 + L2 + at least one L3 path | Required |
+| High-risk / T3 / cross-repo / stateful / memory / scheduler / permission | L1 + L2 + at least one L3 path, with stronger canonical workflow coverage | Required |
 
 **Test level definitions:**
 - **L1 — Unit / local validation:** Single function or module verified in isolation.
@@ -199,12 +199,13 @@ Implementation-Controlled changes affect runtime behavior and must provide evide
 **Dry-run policy:**
 - Dry-run evidence is permitted only as **supplemental** evidence.
 - Dry-run alone is **not sufficient** to satisfy the test requirement for Implementation-Controlled changes.
-- A dry-run may supplement L2 or L3 when a full live environment is unavailable, but the reviewer must confirm the dry-run faithfully represents the real execution path.
+- Dry-run cannot replace L1, L2, or the required L3 path for Implementation-Controlled runtime changes.
+- If live L3 execution is unavailable, a reviewer may accept a simulated/canonical workflow L3 only if it exercises the same end-to-end contract path and the limitation is explicitly documented.
 
 **L3 exemption:**
-- If L3 is not applicable to the change, the author must state the reason explicitly in the PR.
-- The reviewer or Program Agent must accept the exemption before G4 can pass.
-- Exemptions are not allowed for high-risk, cross-repo, stateful, memory, scheduler, or permission changes.
+- L3 exemption is only allowed for changes that are classified as Implementation-Controlled but do not affect executable/runtime behavior, or where no meaningful end-to-end path exists.
+- Exemption must be explicitly justified in the PR and accepted by reviewer plus Program Agent.
+- Exemption is not allowed for runtime-impacting T2/T3 changes, high-risk, cross-repo, stateful, memory, scheduler, permission, runner, adapter, or automation changes.
 
 #### Contract Evidence Rules for Implementation-Controlled
 
@@ -233,7 +234,7 @@ Implementation-Controlled changes affect runtime behavior and must provide evide
 ### Pre-Merge Checklist
 - [ ] Issue is linked in PR description
 - [ ] Design reference is cited
-- [ ] PR includes multi-level test evidence (L1+L2 minimum; L3 for high-risk)
+- [ ] PR includes multi-level test evidence (L1 + L2 + at least one L3 path for runtime-impacting changes)
 - [ ] Rollback plan is documented with specific commands or steps
 - [ ] Reviewer approved
 - [ ] Program Agent or human approval recorded for high-risk changes
@@ -266,7 +267,7 @@ Implementation-Controlled changes affect runtime behavior and must provide evide
 | Schema / example / validation rule | — | Required | Required only if adding/modifying contract; otherwise reference existing contract |
 | Cross-review from other repo | — | Required | Recommended |
 | PR opened | Required | Required | Required |
-| Multi-level test evidence (L1+L2 min; L3 for high-risk) | — | Recommended | Required |
+| Multi-level test evidence (L1 + L2 + at least one L3 path for runtime-impacting IC) | — | Recommended | Required |
 | Dry-run (supplemental only) | — | Allowed | Allowed |
 | Rollback plan | — | Required if replacing contract | Required |
 | Reviewer check | Required | Required | Required |
@@ -402,3 +403,4 @@ Any PR that drifts into another layer's responsibility must be split or re-scope
 | 2026-04-28 | Initial bootstrap profiles defined | Contract-Critical |
 | 2026-04-28 | Aligned with Protocol#2: added AgentCard, field-level boundary note | Contract-Critical |
 | 2026-04-28 | Fixed Codex review findings: tightened IC test requirements, reconciled G3 contract evidence, clarified approval authority | Contract-Critical |
+| 2026-04-28 | Fixed Codex P1: raised IC test minima to L1+L2+L3 for all runtime-impacting work; tightened dry-run and L3 exemption rules | Contract-Critical |

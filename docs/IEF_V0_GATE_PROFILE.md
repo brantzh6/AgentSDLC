@@ -20,7 +20,7 @@ This document defines the seven stage gates for IEF v0. It adapts the AgentSDLC 
 | G1 Scope Gate | Lite — issue + criteria | Standard — issue + criteria + classification | Standard — issue + criteria + classification |
 | G2 Boundary Gate | Lite — profile check | Standard — profile + cross-repo boundary | Standard — profile + cross-repo boundary + runtime boundary |
 | G3 Contract Gate | Null-form pass — confirm no contract, schema, interface, lifecycle, or gate is changed | Required — design + I/O + schema | Required — reference approved contract; mandatory I/O + schema only if adding/modifying contract |
-| G4 Evidence Gate | Lite — PR + no broken links | Standard — PR + schema + cross-review evidence | Standard — PR + multi-level test evidence + rollback plan |
+| G4 Evidence Gate | Lite — PR + no broken links | Standard — PR + schema + cross-review evidence | Standard — PR + L1+L2+L3 multi-level test evidence + rollback plan |
 | G5 Review Gate | Lite — one reviewer check | Standard — cross-review + Program/human approval | Standard — reviewer + Program/human for high-risk; human sign-off mandatory for Section 6 categories |
 | G6 Merge Gate | Lite — checklist + merge | Standard — checklist + approval + rollback known | Standard — checklist + approval + rollback verified; human sign-off for Section 6, Program/human for other high-risk |
 | G7 Learning Gate | Lite — spot-check | Standard — observation + issue closure rules | Standard — observation + regression watch + durable improvement |
@@ -147,7 +147,8 @@ This document defines the seven stage gates for IEF v0. It adapts the AgentSDLC 
 - [ ] For **Contract-Critical:** design reference, explicit I/O, boundary statement, schema/example, and cross-review evidence are present
 - [ ] For **Implementation-Controlled:**
   - [ ] Design reference (or inline contract if new/modified)
-  - [ ] Multi-level test evidence (L1 + L2 minimum; L3 for high-risk / cross-repo / stateful / memory / scheduler / permission changes)
+  - [ ] Multi-level test evidence (L1 + L2 + at least one L3 path for runtime-impacting Implementation-Controlled changes)
+  - [ ] High-risk / cross-repo / stateful / memory / scheduler / permission changes require stronger canonical workflow L3 coverage
   - [ ] Dry-run evidence, if present, is explicitly marked as **supplemental** and does not substitute for required test levels
   - [ ] Rollback plan is documented with specific commands or steps
 - [ ] No placeholder sections (e.g., "TODO: add test") remain
@@ -156,7 +157,9 @@ This document defines the seven stage gates for IEF v0. It adapts the AgentSDLC 
 **Pass Criteria:**
 - Evidence is complete for the selected profile.
 - Reviewer can independently verify the evidence without guessing.
-- For Implementation-Controlled: dry-run alone is **not sufficient**. If L3 is claimed not applicable, the PR contains explicit justification accepted by the reviewer or Program Agent.
+- Dry-run alone is **not sufficient**.
+- L3 path is required for runtime-impacting Implementation-Controlled changes.
+- L3 exemption requires explicit justification and reviewer plus Program Agent acceptance, and is not allowed for T2/T3 runtime-impacting or high-risk categories.
 
 **Failure Handling:**
 - Request evidence from the author.
@@ -322,3 +325,4 @@ G7 Learning Gate — stable? lessons captured?
 | 2026-04-28 | Initial v0 gate profile defined | Contract-Critical |
 | 2026-04-28 | Aligned with Protocol#2: added AgentCard and field-level boundary note | Contract-Critical |
 | 2026-04-28 | Fixed Codex review findings: null-form pass for Design-Lite G3, tightened IC test requirements, reconciled contract evidence, aligned approval authority | Contract-Critical |
+| 2026-04-28 | Fixed Codex P1: raised IC test minima to L1+L2+L3 for all runtime-impacting work; tightened dry-run and L3 exemption rules | Contract-Critical |
