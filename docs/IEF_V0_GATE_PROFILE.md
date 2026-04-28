@@ -290,12 +290,14 @@ G7 Learning Gate — stable? lessons captured?
 ### IEF-Protocol#2
 - Protocol#2 PRs must pass G3 Contract Gate with explicit schema, example, or validation rule.
 - Protocol#2 PRs must pass G5 Review Gate with cross-review from IEF-Operations or IEF-Runners perspective.
-- Modifications to `TaskEnvelope`, `RunEvent`, `ArtifactRef`, or `ContextRef` are treated as Contract-Critical.
+- Modifications to `AgentCard`, `TaskEnvelope`, `RunEvent`, `ArtifactRef`, or `ContextRef` are treated as Contract-Critical.
+- Protocol defines object schemas; Operations may constrain lifecycle-related field values (e.g., `TaskEnvelope.status`). Either layer changing the field definition requires Contract-Critical cross-review.
 
 ### IEF-Operations#2
 - Operations#2 PRs must pass G3 Contract Gate with explicit lifecycle state definitions and transitions.
 - Operations#2 PRs must pass G5 Review Gate with cross-review from IEF-Protocol or IEF-Runners perspective.
 - If Operations#2 includes implementation (validators, scripts, automation), those parts must also satisfy Implementation-Controlled evidence requirements at G4.
+- Operations may reference Protocol objects by name and constrain specific field values, but must not duplicate object definitions.
 
 ---
 
@@ -304,3 +306,4 @@ G7 Learning Gate — stable? lessons captured?
 | Date | Change | Profile |
 |---|---|---|
 | 2026-04-28 | Initial v0 gate profile defined | Contract-Critical |
+| 2026-04-28 | Aligned with Protocol#2: added AgentCard and field-level boundary note | Contract-Critical |
