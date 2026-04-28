@@ -92,7 +92,7 @@ Escalate to **Contract-Critical** when:
 ## 2. Contract-Critical
 
 ### Scope
-- Protocol objects and shared schemas (e.g., `TaskEnvelope`, `RunEvent`, `ArtifactRef`, `ContextRef`)
+- Protocol objects and shared schemas (e.g., `AgentCard`, `TaskEnvelope`, `RunEvent`, `ArtifactRef`, `ContextRef`)
 - Task lifecycle state definitions and transitions
 - Runner interfaces and adapter contracts
 - Knowledge context formats and memory contracts
@@ -260,7 +260,7 @@ Human owner sign-off is **required** before merge for the following categories, 
 1. **IEF top-level boundary changes** — modifications to what each layer (Governance, Protocol, Operations, Program, Runners, Knowledge, Adapters) is allowed to own or implement.
 2. **Repo matrix changes** — adding, removing, or reassigning repositories in the IEF ecosystem.
 3. **Governance profile changes** — modifications to this document or to `docs/IEF_V0_GATE_PROFILE.md`.
-4. **Protocol / Operations core contract changes** — changes to `TaskEnvelope`, `RunEvent`, `ArtifactRef`, `ContextRef`, or the task lifecycle state machine that affect multiple downstream repos.
+4. **Protocol / Operations core contract changes** — changes to `AgentCard`, `TaskEnvelope`, `RunEvent`, `ArtifactRef`, `ContextRef`, or the task lifecycle state machine that affect multiple downstream repos.
 5. **High-risk automation** — GitHub Actions, bots, or scripts that auto-merge, auto-deploy, auto-close issues, or otherwise reduce human oversight.
 6. **Cross-repo architecture changes** — changes with blast radius across three or more IEF repos.
 7. **Rollback-risk data or state changes** — modifications that could corrupt, lose, or irreversibly alter existing task state, artifact references, or runtime memory.
@@ -305,13 +305,15 @@ This section makes the governance profiles binding on sibling repositories.
 
 ### IEF-Protocol#2
 - Any PR for `IEF-Protocol#2` **must satisfy the Contract-Critical profile** at minimum.
-- Any modification of `TaskEnvelope`, `RunEvent`, `ArtifactRef`, or `ContextRef` is classified as **Contract-Critical**.
+- Any modification of `AgentCard`, `TaskEnvelope`, `RunEvent`, `ArtifactRef`, or `ContextRef` is classified as **Contract-Critical**.
 - Protocol schema PRs require cross-review from at least one of IEF-Operations or IEF-Runners.
+- **Field-level boundary:** Protocol defines the object schema and field types. Operations may constrain the allowed values of lifecycle-related fields (e.g., `TaskEnvelope.status`) without redefining the object itself. Either layer changing the field definition requires Contract-Critical review.
 
 ### IEF-Operations#2
 - Any PR for `IEF-Operations#2` **must satisfy the Contract-Critical profile** at minimum.
 - Task lifecycle state definitions and transitions are **Contract-Critical**.
 - If Operations#2 introduces automation, validators, or runner-adjacent scripts, those parts of the PR must satisfy **Implementation-Controlled** evidence requirements.
+- Operations may reference Protocol objects by name and constrain specific field values, but must not duplicate object definitions.
 
 ### Downstream Repos (Blocked)
 - IEF-Runners#2, IEF-Knowledge#2, and IEF-Adapters#2 are **blocked** from implementation until Governance#2, Protocol#2, and Operations#2 have produced draft contracts.
@@ -343,6 +345,11 @@ This section makes the governance profiles binding on sibling repositories.
 - Runner, adapter, or automation implementations (downstream capability repos)
 - Project control center or execution coordination (IEF-Program)
 
+**Cross-layer field boundary:**
+- Protocol owns the object schema (field names, types, structures).
+- Operations owns lifecycle semantics (allowed state values, transition rules).
+- Neither layer may silently redefine fields owned by the other. Changes to shared fields require Contract-Critical cross-review.
+
 Any PR that drifts into another layer's responsibility must be split or re-scoped.
 
 ---
@@ -352,3 +359,4 @@ Any PR that drifts into another layer's responsibility must be split or re-scope
 | Date | Change | Profile |
 |---|---|---|
 | 2026-04-28 | Initial bootstrap profiles defined | Contract-Critical |
+| 2026-04-28 | Aligned with Protocol#2: added AgentCard, field-level boundary note | Contract-Critical |
