@@ -112,7 +112,7 @@ Escalate to **Contract-Critical** when:
 - [ ] Explicit input/output contract documented
 - [ ] Explicit boundary documented (what it owns / does not own)
 - [ ] Schema, example, or validation rule provided
-- [ ] Cross-review from at least one other repo perspective
+- [ ] Cross-review readiness — required reviewers or perspectives from at least one other repo are identified
 - [ ] Rollback plan documented if replacing an existing contract
 
 ### Review Requirements
@@ -265,7 +265,7 @@ Implementation-Controlled changes affect runtime behavior and must provide evide
 | Explicit input/output contract | — | Required | Required only if adding/modifying contract; otherwise reference existing contract |
 | Explicit boundary statement | — | Required | Required only if adding/modifying contract; otherwise reference existing contract |
 | Schema / example / validation rule | — | Required | Required only if adding/modifying contract; otherwise reference existing contract |
-| Cross-review from other repo | — | Required | Recommended |
+| Cross-review readiness (perspectives identified) | — | Required | Recommended |
 | PR opened | Required | Required | Required |
 | Multi-level test evidence (L1 + L2 + at least one L3 path for runtime-impacting IC) | — | Recommended | Required |
 | Dry-run (supplemental only) | — | Allowed | Allowed |
@@ -274,6 +274,8 @@ Implementation-Controlled changes affect runtime behavior and must provide evide
 | Program/human approval before merge | — | Required | Required for high-risk |
 | Human sign-off (Section 6 categories) | — | Required if applicable | Required if applicable |
 | No regression check | — | Recommended | Required |
+
+**Note on cross-review timing:** G4 Evidence Gate requires cross-review readiness (required reviewers or perspectives are identified). Completed cross-review is a G5 Review Gate requirement, not a G4 Evidence Gate requirement.
 
 **Note on contract evidence for Implementation-Controlled:** If an Implementation-Controlled PR introduces a new contract or modifies an existing one, the evidence bar rises to Contract-Critical for the contract portion. The PR should either (a) split the contract change into a separate Contract-Critical PR, or (b) provide full contract evidence inline and accept the higher review bar.
 
@@ -404,3 +406,4 @@ Any PR that drifts into another layer's responsibility must be split or re-scope
 | 2026-04-28 | Aligned with Protocol#2: added AgentCard, field-level boundary note | Contract-Critical |
 | 2026-04-28 | Fixed Codex review findings: tightened IC test requirements, reconciled G3 contract evidence, clarified approval authority | Contract-Critical |
 | 2026-04-28 | Fixed Codex P1: raised IC test minima to L1+L2+L3 for all runtime-impacting work; tightened dry-run and L3 exemption rules | Contract-Critical |
+| 2026-04-28 | Fixed Codex P1: clarified cross-review timing — readiness required at G4, completed cross-review at G5 | Contract-Critical |
